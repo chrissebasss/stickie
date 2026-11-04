@@ -107,14 +107,24 @@ export class WindowManager {
       this.syncOpenNoteIdsToSettings()
     })
 
-    const noteUrl = process.env.ELECTRON_RENDERER_URL
+    const devUrl = process.env.ELECTRON_RENDERER_URL
       ? `${process.env.ELECTRON_RENDERER_URL}/note/index.html?id=${encodeURIComponent(noteId)}`
-      : join(__dirname, '../renderer/note/index.html')
+      : null
+    const distPath = join(__dirname, '../renderer/note/index.html')
 
-    if (process.env.ELECTRON_RENDERER_URL) {
-      await win.loadURL(noteUrl)
+    if (devUrl) {
+      try {
+        await win.loadURL(devUrl)
+      } catch (err) {
+        console.warn(`[WindowManager] Could not load dev server URL ${devUrl}, falling back to built bundle:`, err)
+        try {
+          await win.loadFile(distPath, { query: { id: noteId } })
+        } catch (fileErr) {
+          console.error(`[WindowManager] Fallback loadFile also failed:`, fileErr)
+        }
+      }
     } else {
-      await win.loadFile(noteUrl, { query: { id: noteId } })
+      await win.loadFile(distPath, { query: { id: noteId } })
     }
 
     this.syncOpenNoteIdsToSettings()
