@@ -48,7 +48,7 @@ export interface StiklyAPI {
   // Note specific
   getNote: (noteId: string) => Promise<Note | null>
   saveNote: (note: Note) => Promise<void>
-  closeNote: (noteId: string) => Promise<void>
+  closeNote: (noteId: string, currentNote?: Note) => Promise<void>
   createNote: (options?: { plainText?: string; color?: NoteColor }) => Promise<Note>
   deleteNote: (noteId: string) => Promise<boolean>
   setNotePin: (noteId: string, alwaysOnTop: boolean) => Promise<void>

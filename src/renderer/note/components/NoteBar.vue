@@ -37,17 +37,17 @@ function onCustomColor(event: Event) {
 
 <template>
   <header
-    class="group h-8 px-2 flex items-center justify-between select-none bg-note-bar text-note-barFg relative border-b border-black/5 dark:border-white/5 transition-colors duration-150"
+    class="group h-8 px-2 flex items-center justify-between select-none bg-note-bar text-note-barFg relative border-b border-black/5 dark:border-black/20 transition-colors duration-150"
     style="-webkit-app-region: drag;"
   >
-    <!-- Left: Drag area title or subtle indicator -->
-    <div class="flex items-center space-x-1.5 opacity-60">
-      <div class="w-2 h-2 rounded-full bg-current opacity-40"></div>
+    <!-- Left: Drag handle area -->
+    <div class="flex-1 h-full flex items-center" style="-webkit-app-region: drag;">
+      <span class="text-[11px] font-medium opacity-50 px-1 select-none">Stikly</span>
     </div>
 
-    <!-- Right: Interactive Actions (reveal on hover/focus for clean sticky note feel) -->
+    <!-- Right: Interactive Actions -->
     <div
-      class="flex items-center space-x-0.5 opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150"
+      class="flex items-center space-x-0.5 opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150"
       style="-webkit-app-region: no-drag;"
     >
       <!-- New note -->

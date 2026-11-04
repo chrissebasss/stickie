@@ -50,12 +50,12 @@ function insertTable() {
 <template>
   <div
     v-if="editor"
-    class="flex items-center space-x-0.5 px-2 py-1 border-b border-black/5 dark:border-white/5 bg-black/5 dark:bg-white/5 text-xs overflow-x-auto select-none"
+    class="flex items-center space-x-0.5 px-2 py-1 bg-black/[0.03] dark:bg-black/25 text-xs text-note-fg/75 border-b border-black/5 dark:border-black/20 overflow-x-auto select-none transition-colors"
   >
     <!-- Bold -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15 font-bold': editor.isActive('bold') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg font-bold': editor.isActive('bold') }"
       title="Bold (Ctrl+B)"
       @click="editor.chain().focus().toggleBold().run()"
     >
@@ -64,8 +64,8 @@ function insertTable() {
 
     <!-- Italic -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('italic') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('italic') }"
       title="Italic (Ctrl+I)"
       @click="editor.chain().focus().toggleItalic().run()"
     >
@@ -74,8 +74,8 @@ function insertTable() {
 
     <!-- Underline -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('underline') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('underline') }"
       title="Underline (Ctrl+U)"
       @click="editor.chain().focus().toggleUnderline().run()"
     >
@@ -84,20 +84,20 @@ function insertTable() {
 
     <!-- Strikethrough -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('strike') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('strike') }"
       title="Strikethrough (Ctrl+Shift+X)"
       @click="editor.chain().focus().toggleStrike().run()"
     >
       <Strikethrough class="w-3.5 h-3.5" />
     </button>
 
-    <div class="w-px h-3.5 bg-black/10 dark:bg-white/10 mx-0.5" />
+    <div class="w-px h-3 bg-black/10 dark:bg-white/10 mx-1" />
 
     <!-- Text Color Menu -->
     <div class="relative">
       <button
-        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center"
+        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         title="Text color"
         @click="showColorMenu = !showColorMenu"
       >
@@ -120,8 +120,8 @@ function insertTable() {
     <!-- Highlight Color Menu -->
     <div class="relative">
       <button
-        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center"
-        :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('highlight') }"
+        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
+        :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('highlight') }"
         title="Highlight"
         @click="showHighlightMenu = !showHighlightMenu"
       >
@@ -148,12 +148,12 @@ function insertTable() {
       </div>
     </div>
 
-    <div class="w-px h-3.5 bg-black/10 dark:bg-white/10 mx-0.5" />
+    <div class="w-px h-3 bg-black/10 dark:bg-white/10 mx-1" />
 
     <!-- Bullet List -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('bulletList') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('bulletList') }"
       title="Bullet List (Ctrl+Shift+8)"
       @click="editor.chain().focus().toggleBulletList().run()"
     >
@@ -162,8 +162,8 @@ function insertTable() {
 
     <!-- Ordered List -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('orderedList') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('orderedList') }"
       title="Numbered List (Ctrl+Shift+7)"
       @click="editor.chain().focus().toggleOrderedList().run()"
     >
@@ -172,21 +172,21 @@ function insertTable() {
 
     <!-- Task / Checklist -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
-      :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('taskList') }"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
+      :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('taskList') }"
       title="Checklist (Ctrl+Shift+9)"
       @click="editor.chain().focus().toggleTaskList().run()"
     >
       <CheckSquare class="w-3.5 h-3.5" />
     </button>
 
-    <div class="w-px h-3.5 bg-black/10 dark:bg-white/10 mx-0.5" />
+    <div class="w-px h-3 bg-black/10 dark:bg-white/10 mx-1" />
 
     <!-- Table Menu -->
     <div class="relative">
       <button
-        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center"
-        :class="{ 'bg-black/15 dark:bg-white/15': editor.isActive('table') }"
+        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
+        :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('table') }"
         title="Table options"
         @click="showTableMenu = !showTableMenu"
       >
@@ -241,7 +241,7 @@ function insertTable() {
 
     <!-- Image -->
     <button
-      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
+      class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       title="Insert image"
       @click="emit('pickImage')"
     >

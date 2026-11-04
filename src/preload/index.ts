@@ -13,7 +13,8 @@ import type {
 const api: StiklyAPI = {
   getNote: (noteId: string) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_GET, noteId),
   saveNote: (note: Note) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_SAVE, note),
-  closeNote: (noteId: string) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_CLOSE, noteId),
+  closeNote: (noteId: string, currentNote?: Note) =>
+    ipcRenderer.invoke(IPC_CHANNELS.NOTE_CLOSE, noteId, currentNote),
   createNote: (options) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_CREATE, options),
   deleteNote: (noteId: string) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_DELETE, noteId),
   setNotePin: (noteId: string, alwaysOnTop: boolean) =>

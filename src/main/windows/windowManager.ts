@@ -1,4 +1,4 @@
-import { BrowserWindow, app } from 'electron'
+import { BrowserWindow, app, screen } from 'electron'
 import { join } from 'path'
 import type { Note, Bounds } from '../../shared/types'
 import type { NoteStore } from '../store/noteStore'
@@ -95,6 +95,11 @@ export class WindowManager {
     win.on('move', saveBounds)
     win.on('resize', saveBounds)
 
+    win.on('close', async () => {
+      if (boundsDebounce) clearTimeout(boundsDebounce)
+      await this.noteStore.flush()
+    })
+
     win.on('closed', async () => {
       if (boundsDebounce) clearTimeout(boundsDebounce)
       this.noteWindows.delete(noteId)
@@ -138,15 +143,29 @@ export class WindowManager {
     }
   }
 
-  private getNextCascadeBounds(): Bounds {
+  public getNextCascadeBounds(): Bounds {
     const baseWidth = 320
     const baseHeight = 360
+
+    // Detect where the user currently is:
+    // Priority 1: If manager window is focused/visible, place note on the manager window's display
+    // Priority 2: Display nearest the cursor position
+    let workArea = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+
+    const managerWin = this.managerWindow
+    if (managerWin && !managerWin.isDestroyed() && managerWin.isVisible()) {
+      if (managerWin.isFocused()) {
+        const display = screen.getDisplayMatching(managerWin.getBounds())
+        workArea = display.workArea
+      }
+    }
+
     const offset = (this.lastCascadeOffset % 8) * 30
     this.lastCascadeOffset++
 
     return {
-      x: 100 + offset,
-      y: 100 + offset,
+      x: workArea.x + 80 + offset,
+      y: workArea.y + 80 + offset,
       width: baseWidth,
       height: baseHeight
     }

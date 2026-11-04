@@ -33,14 +33,17 @@ export function registerIpcHandlers(
   })
 
   // 3. Note: Close
-  ipcMain.handle(IPC_CHANNELS.NOTE_CLOSE, async (_, noteId: string): Promise<void> => {
-    if (!noteId) return
-    const note = await noteStore.getNote(noteId)
-    if (note) {
-      await noteStore.discardIfEmpty(note)
+  ipcMain.handle(
+    IPC_CHANNELS.NOTE_CLOSE,
+    async (_, noteId: string, currentNote?: Note): Promise<void> => {
+      if (!noteId) return
+      const noteToSave = currentNote || (await noteStore.getNote(noteId))
+      if (noteToSave) {
+        await noteStore.discardIfEmpty(noteToSave)
+      }
+      await windowManager.closeNote(noteId)
     }
-    await windowManager.closeNote(noteId)
-  })
+  )
 
   // 4. Note: Create
   ipcMain.handle(
@@ -50,6 +53,7 @@ export function registerIpcHandlers(
       options?: { plainText?: string; color?: NoteColor }
     ): Promise<Note> => {
       const now = Date.now()
+      const cascadeBounds = windowManager.getNextCascadeBounds()
       const newNote: Note = {
         schemaVersion: 1,
         id: uuidv4(),
@@ -57,7 +61,7 @@ export function registerIpcHandlers(
         createdAt: now,
         updatedAt: now,
         color: options?.color || { kind: 'preset', id: 'yellow' },
-        bounds: { x: 120, y: 120, width: 320, height: 360 },
+        bounds: cascadeBounds,
         content: {
           type: 'doc',
           content: [

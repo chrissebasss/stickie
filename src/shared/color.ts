@@ -12,19 +12,19 @@ export const PRESET_COLORS: Record<
 > = {
   yellow: {
     light: { bg: '#fef08a', barBg: '#fde047' },
-    dark: { bg: '#422006', barBg: '#291503' }
+    dark: { bg: '#292213', barBg: '#3b311b' }
   },
   green: {
     light: { bg: '#bbf7d0', barBg: '#86efac' },
-    dark: { bg: '#052e16', barBg: '#021a0c' }
+    dark: { bg: '#14261c', barBg: '#1e3829' }
   },
   blue: {
     light: { bg: '#bfdbfe', barBg: '#93c5fd' },
-    dark: { bg: '#172554', barBg: '#0f172a' }
+    dark: { bg: '#162232', barBg: '#203248' }
   },
   pink: {
     light: { bg: '#fbcfe8', barBg: '#f9a8d4' },
-    dark: { bg: '#500724', barBg: '#370417' }
+    dark: { bg: '#2b1724', barBg: '#3d2033' }
   }
 }
 

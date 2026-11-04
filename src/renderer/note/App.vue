@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, nextTick } from 'vue'
 import NoteBar from './components/NoteBar.vue'
 import EditorToolbar from './components/EditorToolbar.vue'
 import NoteEditor from './components/NoteEditor.vue'
@@ -10,7 +10,9 @@ const noteId = ref<string>('')
 const note = ref<Note | null>(null)
 const isDark = ref<boolean>(false)
 const showToolbar = ref<boolean>(true)
+const isDirty = ref<boolean>(false)
 const editorComponent = ref<InstanceType<typeof NoteEditor> | null>(null)
+let autoSaveInterval: NodeJS.Timeout | null = null
 
 const editorInstance = computed(() => editorComponent.value?.editor)
 
@@ -55,12 +57,29 @@ async function loadNote() {
   }
 }
 
+async function saveCurrentNote(forceSync = false) {
+  if (!note.value || !window.stikly) return
+  if (editorInstance.value) {
+    note.value.content = editorInstance.value.getJSON()
+    note.value.plainText = editorInstance.value.getText()
+  }
+  const rawNote: Note = JSON.parse(JSON.stringify(note.value))
+  isDirty.value = false
+  if (forceSync) {
+    await window.stikly.saveNote(rawNote)
+  } else {
+    window.stikly.saveNote(rawNote)
+  }
+}
+
 function onEditorUpdate({ content, plainText }: { content: JSONContent; plainText: string }) {
   if (!note.value) return
   note.value.content = content
   note.value.plainText = plainText
+  isDirty.value = true
   if (window.stikly) {
-    window.stikly.saveNote(note.value)
+    const rawNote: Note = JSON.parse(JSON.stringify(note.value))
+    window.stikly.saveNote(rawNote)
   }
 }
 
@@ -79,7 +98,12 @@ async function updateColor(color: NoteColor) {
 
 async function closeNote() {
   if (!note.value || !window.stikly) return
-  await window.stikly.closeNote(note.value.id)
+  if (editorInstance.value) {
+    note.value.content = editorInstance.value.getJSON()
+    note.value.plainText = editorInstance.value.getText()
+  }
+  const rawNote: Note = JSON.parse(JSON.stringify(note.value))
+  await window.stikly.closeNote(note.value.id, rawNote)
 }
 
 async function createNewNote() {
@@ -95,14 +119,42 @@ async function handlePickImage() {
   }
 }
 
+function handleWindowBlur() {
+  if (isDirty.value) {
+    saveCurrentNote(true)
+  }
+}
+
+function handleBeforeUnload() {
+  saveCurrentNote(true)
+}
+
 onMounted(() => {
   loadNote()
+
+  // Auto-save every 3 seconds if there are changes
+  autoSaveInterval = setInterval(() => {
+    if (isDirty.value) {
+      saveCurrentNote()
+    }
+  }, 3000)
+
+  window.addEventListener('blur', handleWindowBlur)
+  window.addEventListener('beforeunload', handleBeforeUnload)
+})
+
+onBeforeUnmount(() => {
+  if (autoSaveInterval) {
+    clearInterval(autoSaveInterval)
+  }
+  window.removeEventListener('blur', handleWindowBlur)
+  window.removeEventListener('beforeunload', handleBeforeUnload)
 })
 </script>
 
 <template>
   <div
-    class="h-full w-full flex flex-col overflow-hidden rounded-lg shadow-xl border border-black/10 dark:border-white/10 transition-colors duration-150"
+    class="h-full w-full flex flex-col overflow-hidden border border-black/15 dark:border-white/10 select-none transition-colors duration-150"
     :style="rootStyle"
     style="background-color: var(--note-bg); color: var(--note-fg);"
   >
