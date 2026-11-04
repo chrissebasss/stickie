@@ -23,11 +23,19 @@ body {
   overflow: hidden;
 }
 
-/* Explicit text selection inside editor */
+/* Explicit text selection inside editor and outline suppression */
 .ProseMirror {
   user-select: text !important;
   -webkit-user-select: text !important;
   cursor: text;
+}
+
+.ProseMirror,
+.ProseMirror:focus,
+.ProseMirror:focus-visible,
+.ProseMirror-focused {
+  outline: none !important;
+  box-shadow: none !important;
 }
 
 /* Custom scrollbars */

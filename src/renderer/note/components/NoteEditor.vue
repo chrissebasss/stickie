@@ -80,6 +80,9 @@ const editor = useEditor({
     CustomShortcuts
   ],
   editorProps: {
+    attributes: {
+      class: 'outline-none focus:outline-none focus-visible:outline-none ring-0 focus:ring-0 border-none'
+    },
     handlePaste(view, event) {
       const items = event.clipboardData?.items
       if (!items || !props.noteId || !window.stikly) return false
@@ -198,9 +201,21 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
+.note-editor-wrapper,
+.note-editor-wrapper *,
+.ProseMirror,
+.ProseMirror *,
+.ProseMirror:focus,
+.ProseMirror:focus-visible,
+.ProseMirror-focused {
+  outline: none !important;
+  outline-style: none !important;
+  box-shadow: none !important;
+  border-color: transparent !important;
+}
+
 .ProseMirror,
 .ProseMirror * {
-  outline: none;
   user-select: text !important;
   -webkit-user-select: text !important;
 }
