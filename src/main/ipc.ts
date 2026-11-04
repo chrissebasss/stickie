@@ -13,6 +13,7 @@ import type { NoteStore } from './store/noteStore'
 import type { SettingsStore } from './store/settingsStore'
 import type { WindowManager } from './windows/windowManager'
 import { saveAssetFile, saveAssetBuffer } from './store/assets'
+import { importFilesFromDisk, exportNoteToFile } from './importExport'
 
 export function registerIpcHandlers(
   noteStore: NoteStore,
@@ -204,6 +205,20 @@ export function registerIpcHandlers(
       if (!noteId || !buffer) return null
       const nodeBuf = Buffer.from(buffer)
       return saveAssetBuffer(noteStore.baseDir, noteId, nodeBuf, ext)
+    }
+  )
+
+  // 16. Import files
+  ipcMain.handle(IPC_CHANNELS.IMPORT_FILES, async () => {
+    return importFilesFromDisk(noteStore)
+  })
+
+  // 17. Export note
+  ipcMain.handle(
+    IPC_CHANNELS.EXPORT_NOTE,
+    async (_, noteId: string, format: 'json' | 'md'): Promise<boolean> => {
+      if (!noteId) return false
+      return exportNoteToFile(noteStore, noteId, format)
     }
   )
 

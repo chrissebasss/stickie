@@ -106,6 +106,12 @@ async function importFiles() {
     await window.stikly.importFiles()
   }
 }
+
+async function exportNote(note: NoteIndexItem) {
+  if (window.stikly) {
+    await window.stikly.exportNote(note.id, 'md')
+  }
+}
 </script>
 
 <template>
@@ -194,6 +200,7 @@ async function importFiles() {
           :search-query="searchQuery"
           @open="openNote"
           @delete="promptDelete"
+          @export="exportNote"
         />
       </div>
 

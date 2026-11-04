@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed } from 'vue'
-import { ExternalLink, Trash2 } from 'lucide-vue-next'
+import { ExternalLink, Trash2, Download } from 'lucide-vue-next'
 import type { NoteIndexItem } from '../../../shared/types'
 import { getNoteColorScheme } from '../../../shared/color'
 
@@ -13,6 +13,7 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'open', id: string): void
   (e: 'delete', note: NoteIndexItem): void
+  (e: 'export', note: NoteIndexItem): void
 }>()
 
 const colorScheme = computed(() => {
@@ -83,6 +84,14 @@ function escapeRegExp(str: string): string {
       <span>{{ formattedDate }}</span>
 
       <div class="flex items-center space-x-1 opacity-80 group-hover:opacity-100 transition-opacity">
+        <button
+          class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 hover:text-blue-600 dark:hover:text-blue-400"
+          title="Export note"
+          aria-label="Export note"
+          @click.stop="emit('export', note)"
+        >
+          <Download class="w-3.5 h-3.5" />
+        </button>
         <button
           class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-600 dark:text-stone-300 hover:text-blue-600 dark:hover:text-blue-400"
           title="Open note"
