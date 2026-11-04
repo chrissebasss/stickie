@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Plus, Pin, PinOff, Palette, X, SlidersHorizontal } from 'lucide-vue-next'
 import type { NoteColor, PresetColorId } from '../../../shared/types'
 
@@ -17,6 +18,8 @@ const emit = defineEmits<{
   (e: 'close'): void
   (e: 'newNote'): void
 }>()
+
+const { t } = useI18n()
 
 const showColorPicker = ref(false)
 
@@ -53,8 +56,8 @@ function onCustomColor(event: Event) {
       <!-- New note -->
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
-        aria-label="New note"
-        title="New note (Ctrl+N)"
+        :aria-label="t('note.newNote')"
+        :title="t('note.newNote')"
         @click="emit('newNote')"
       >
         <Plus class="w-3.5 h-3.5" />
@@ -64,8 +67,8 @@ function onCustomColor(event: Event) {
       <div class="relative">
         <button
           class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
-          aria-label="Change color"
-          title="Change note color"
+          :aria-label="t('note.color')"
+          :title="t('note.color')"
           @click="showColorPicker = !showColorPicker"
         >
           <Palette class="w-3.5 h-3.5" />
@@ -94,7 +97,7 @@ function onCustomColor(event: Event) {
             <input
               type="color"
               class="opacity-0 absolute w-0 h-0"
-              aria-label="Custom color picker"
+              :aria-label="t('note.customColor')"
               @change="onCustomColor"
             />
             <span class="text-[10px] font-bold">🎨</span>
@@ -106,8 +109,8 @@ function onCustomColor(event: Event) {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
         :class="{ 'opacity-60': !showToolbar }"
-        aria-label="Toggle formatting toolbar"
-        title="Toggle formatting toolbar"
+        :aria-label="t('note.toggleToolbar')"
+        :title="t('note.toggleToolbar')"
         @click="emit('toggleToolbar')"
       >
         <SlidersHorizontal class="w-3.5 h-3.5" />
@@ -116,8 +119,8 @@ function onCustomColor(event: Event) {
       <!-- Pin / Always on top -->
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
-        :aria-label="alwaysOnTop ? 'Unpin note' : 'Pin note on top'"
-        :title="alwaysOnTop ? 'Unpin note' : 'Pin note on top'"
+        :aria-label="alwaysOnTop ? t('note.unpin') : t('note.pin')"
+        :title="alwaysOnTop ? t('note.unpin') : t('note.pin')"
         @click="emit('togglePin')"
       >
         <Pin v-if="!alwaysOnTop" class="w-3.5 h-3.5" />
@@ -127,8 +130,8 @@ function onCustomColor(event: Event) {
       <!-- Close note -->
       <button
         class="p-1 rounded hover:bg-red-500 hover:text-white text-note-barFg focus:outline-none focus:ring-1 focus:ring-current transition-colors"
-        aria-label="Close note"
-        title="Close note"
+        :aria-label="t('note.close')"
+        :title="t('note.close')"
         @click="emit('close')"
       >
         <X class="w-3.5 h-3.5" />

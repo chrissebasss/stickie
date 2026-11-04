@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { AlertTriangle } from 'lucide-vue-next'
 import type { NoteIndexItem } from '../../../shared/types'
 
@@ -10,6 +11,8 @@ const emit = defineEmits<{
   (e: 'confirm'): void
   (e: 'cancel'): void
 }>()
+
+const { t } = useI18n()
 </script>
 
 <template>
@@ -29,12 +32,13 @@ const emit = defineEmits<{
           <AlertTriangle class="w-5 h-5" />
         </div>
         <h3 id="dialog-title" class="font-semibold text-stone-900 dark:text-stone-100">
-          Delete Sticky Note?
+          {{ t('deleteModal.title') }}
         </h3>
       </div>
 
       <p class="text-xs text-stone-500 dark:text-stone-400 leading-relaxed">
-        Are you sure you want to delete <span class="font-medium text-stone-800 dark:text-stone-200">"{{ note.title }}"</span>? This will permanently remove the note and all attached images.
+        {{ t('deleteModal.message') }}
+        <span class="block mt-1 font-medium text-stone-800 dark:text-stone-200">"{{ note.title }}"</span>
       </p>
 
       <div class="flex items-center justify-end space-x-2 pt-2">
@@ -42,13 +46,13 @@ const emit = defineEmits<{
           class="px-3 py-1.5 text-xs font-medium rounded-lg border border-stone-300 dark:border-stone-600 text-stone-700 dark:text-stone-200 hover:bg-stone-100 dark:hover:bg-stone-700 focus:outline-none focus:ring-2 focus:ring-stone-400"
           @click="emit('cancel')"
         >
-          Cancel
+          {{ t('deleteModal.cancel') }}
         </button>
         <button
           class="px-3 py-1.5 text-xs font-medium rounded-lg bg-red-600 hover:bg-red-700 text-white shadow-sm focus:outline-none focus:ring-2 focus:ring-red-500"
           @click="emit('confirm')"
         >
-          Delete Note
+          {{ t('deleteModal.confirm') }}
         </button>
       </div>
     </div>

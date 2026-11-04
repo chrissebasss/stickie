@@ -7,6 +7,7 @@ export const CURRENT_SETTINGS_SCHEMA = 1
 export const DEFAULT_SETTINGS: Settings = {
   schemaVersion: CURRENT_SETTINGS_SCHEMA,
   theme: 'system',
+  language: 'system',
   reopenNotesOnLaunch: false,
   openNoteIds: [],
   alwaysOnTop: false,

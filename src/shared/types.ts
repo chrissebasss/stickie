@@ -41,12 +41,14 @@ export interface NoteIndexItem {
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 export type ResolvedTheme = 'light' | 'dark'
+export type LanguageMode = 'system' | 'en' | 'nb'
 
 export interface Settings {
   schemaVersion: 1
   theme: ThemeMode
+  language?: LanguageMode
   reopenNotesOnLaunch: boolean
-  openNoteIds: string[];
+  openNoteIds: string[]
   managerBounds?: Bounds
   alwaysOnTop: boolean
   launchAtLogin: boolean

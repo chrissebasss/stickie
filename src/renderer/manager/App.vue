@@ -1,21 +1,25 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload } from 'lucide-vue-next'
 import SearchBar from './components/SearchBar.vue'
 import NoteCard from './components/NoteCard.vue'
 import DeleteConfirmModal from './components/DeleteConfirmModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import CustomSelect from './components/CustomSelect.vue'
+import { setAppLanguage } from '../i18n'
 import type { NoteIndexItem, Settings } from '../../shared/types'
+
+const { t } = useI18n()
 
 const notes = ref<NoteIndexItem[]>([])
 const searchQuery = ref('')
 const sortOrder = ref<'newest' | 'oldest' | 'title'>('newest')
-const sortOptions: { value: 'newest' | 'oldest' | 'title'; label: string }[] = [
-  { value: 'newest', label: 'Newest first' },
-  { value: 'oldest', label: 'Oldest first' },
-  { value: 'title', label: 'Title (A-Z)' }
-]
+const sortOptions = computed<{ value: 'newest' | 'oldest' | 'title'; label: string }[]>(() => [
+  { value: 'newest', label: t('manager.sortNewest') },
+  { value: 'oldest', label: t('manager.sortOldest') },
+  { value: 'title', label: t('manager.sortTitle') }
+])
 const isDark = ref(false)
 const showSettings = ref(false)
 const noteToDelete = ref<NoteIndexItem | null>(null)
@@ -23,6 +27,7 @@ const noteToDelete = ref<NoteIndexItem | null>(null)
 const settings = ref<Settings>({
   schemaVersion: 1,
   theme: 'system',
+  language: 'system',
   reopenNotesOnLaunch: false,
   openNoteIds: [],
   alwaysOnTop: false,
@@ -33,6 +38,10 @@ onMounted(async () => {
   if (window.stikly) {
     notes.value = await window.stikly.listNotes()
     settings.value = await window.stikly.getSettings()
+
+    if (settings.value.language) {
+      setAppLanguage(settings.value.language)
+    }
 
     const theme = await window.stikly.getTheme()
     isDark.value = theme.resolved === 'dark'
@@ -78,9 +87,12 @@ async function createNote() {
   }
 }
 
-async function openNote(id: string) {
-  if (window.stikly) {
-    await window.stikly.openNote(id)
+async function toggleNote(noteItem: NoteIndexItem) {
+  if (!window.stikly) return
+  if (noteItem.isOpen) {
+    await window.stikly.closeNote(noteItem.id)
+  } else {
+    await window.stikly.openNote(noteItem.id)
   }
 }
 
@@ -104,6 +116,9 @@ async function confirmDelete() {
 async function updateSettings(patch: Partial<Settings>) {
   if (window.stikly) {
     settings.value = await window.stikly.updateSettings(patch)
+    if (patch.language) {
+      setAppLanguage(patch.language)
+    }
   }
 }
 
@@ -130,7 +145,7 @@ async function exportNote(note: NoteIndexItem) {
         </div>
         <div>
           <h1 class="text-base font-bold tracking-tight">Stikly</h1>
-          <p class="text-[11px] text-stone-500 dark:text-stone-400">Desktop Sticky Notes</p>
+          <p class="text-[11px] text-stone-500 dark:text-stone-400">{{ t('app.myNotes') }}</p>
         </div>
       </div>
 
@@ -141,13 +156,13 @@ async function exportNote(note: NoteIndexItem) {
           @click="createNote"
         >
           <Plus class="w-4 h-4" />
-          <span>New Note</span>
+          <span>{{ t('manager.newNote') }}</span>
         </button>
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          title="Import notes (.txt, .md, .html, .json)"
-          aria-label="Import notes"
+          :title="t('manager.importNotes')"
+          :aria-label="t('manager.importNotes')"
           @click="importFiles"
         >
           <Upload class="w-4 h-4" />
@@ -155,8 +170,8 @@ async function exportNote(note: NoteIndexItem) {
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          title="Close all open notes"
-          aria-label="Close all open notes"
+          :title="t('manager.closeAllNotes')"
+          :aria-label="t('manager.closeAllNotes')"
           @click="closeAllNotes"
         >
           <XCircle class="w-4 h-4" />
@@ -164,8 +179,8 @@ async function exportNote(note: NoteIndexItem) {
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          title="Settings"
-          aria-label="Settings"
+          :title="t('manager.settings')"
+          :aria-label="t('manager.settings')"
           @click="showSettings = true"
         >
           <SettingsIcon class="w-4 h-4" />
@@ -196,7 +211,7 @@ async function exportNote(note: NoteIndexItem) {
           :note="note"
           :is-dark="isDark"
           :search-query="searchQuery"
-          @open="openNote"
+          @toggle="toggleNote"
           @delete="promptDelete"
           @export="exportNote"
         />
@@ -212,34 +227,28 @@ async function exportNote(note: NoteIndexItem) {
         </div>
         <div class="space-y-1">
           <p class="text-sm font-semibold text-stone-700 dark:text-stone-300">
-            {{ searchQuery ? 'No matching notes found' : 'No sticky notes yet' }}
+            {{ searchQuery ? t('manager.noMatchTitle') : t('manager.noNotesTitle') }}
           </p>
           <p class="text-xs text-stone-400 max-w-xs">
-            {{ searchQuery ? 'Try adjusting your search terms.' : 'Create a note to jot down your thoughts, reminders, or checklists.' }}
+            {{ searchQuery ? t('manager.noMatchDesc') : t('manager.noNotesDesc') }}
           </p>
         </div>
-        <button
-          v-if="!searchQuery"
-          class="mt-2 px-3 py-1.5 text-xs font-medium rounded-lg bg-blue-600 hover:bg-blue-700 text-white shadow-sm transition-colors"
-          @click="createNote"
-        >
-          Create your first note
-        </button>
       </div>
     </main>
 
-    <!-- Modals -->
-    <DeleteConfirmModal
-      :note="noteToDelete"
-      @confirm="confirmDelete"
-      @cancel="noteToDelete = null"
-    />
-
+    <!-- Settings Dialog -->
     <SettingsModal
       v-if="showSettings"
       :settings="settings"
       @update="updateSettings"
       @close="showSettings = false"
+    />
+
+    <!-- Delete Confirmation Dialog -->
+    <DeleteConfirmModal
+      :note="noteToDelete"
+      @confirm="confirmDelete"
+      @cancel="noteToDelete = null"
     />
   </div>
 </template>

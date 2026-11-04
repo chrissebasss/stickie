@@ -9,7 +9,7 @@ import { createManagerWindow } from './windows/managerWindow'
 import { registerIpcHandlers, applyTheme } from './ipc'
 import { setupDisplayListeners } from './displays'
 import { getAssetDiskPath } from './store/assets'
-import { setupTray, getTray } from './tray'
+import { setupTray, getTray, destroyTray } from './tray'
 
 // Register custom protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -105,13 +105,17 @@ app.whenReady().then(async () => {
   registerIpcHandlers(noteStore, settingsStore, windowManager)
   setupDisplayListeners(windowManager, noteStore)
 
+  const isQuittingFn = () => isQuitting
+
   const onManagerClose = () => {
+    if (isQuitting) return
     const mgr = windowManager.getManagerWindow()
     if (!mgr) return
     if (getTray()) {
       mgr.hide()
     } else {
       if (windowManager.getOpenNoteIds().length === 0) {
+        isQuitting = true
         app.quit()
       } else {
         mgr.hide()
@@ -122,7 +126,7 @@ app.whenReady().then(async () => {
   const showManager = () => {
     let mgr = windowManager.getManagerWindow()
     if (!mgr || mgr.isDestroyed()) {
-      mgr = createManagerWindow(settingsStore, onManagerClose)
+      mgr = createManagerWindow(settingsStore, onManagerClose, isQuittingFn)
       windowManager.setManagerWindow(mgr)
     }
     if (mgr.isMinimized()) mgr.restore()
@@ -131,7 +135,7 @@ app.whenReady().then(async () => {
   }
 
   // Always open manager window on startup (AGENTS.md 4.8)
-  const managerWin = createManagerWindow(settingsStore, onManagerClose)
+  const managerWin = createManagerWindow(settingsStore, onManagerClose, isQuittingFn)
   windowManager.setManagerWindow(managerWin)
 
   setupTray({
@@ -144,7 +148,7 @@ app.whenReady().then(async () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         color: { kind: 'preset' as const, id: 'yellow' as const },
-        bounds: { x: 120, y: 120, width: 320, height: 360 },
+        bounds: windowManager.getNextCascadeBounds(),
         content: { type: 'doc', content: [{ type: 'paragraph' }] },
         plainText: '',
         alwaysOnTop: false
@@ -157,8 +161,11 @@ app.whenReady().then(async () => {
       await noteStore.flush()
       windowManager.closeAllNotes()
     },
-    onQuit: () => {
-      app.quit()
+    onQuit: async () => {
+      isQuitting = true
+      destroyTray()
+      await flushAndExit()
+      app.exit(0)
     }
   })
 
@@ -176,23 +183,24 @@ app.whenReady().then(async () => {
       mgr.show()
       mgr.focus()
     } else {
-      const newMgr = createManagerWindow(settingsStore)
+      const newMgr = createManagerWindow(settingsStore, onManagerClose, isQuittingFn)
       windowManager.setManagerWindow(newMgr)
     }
   })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      const newMgr = createManagerWindow(settingsStore)
+      const newMgr = createManagerWindow(settingsStore, onManagerClose, isQuittingFn)
       windowManager.setManagerWindow(newMgr)
     }
   })
 })
 
 // Flush-on-exit handlers (AGENTS.md 4.5b)
+let hasFlushed = false
 const flushAndExit = async () => {
-  if (isQuitting) return
-  isQuitting = true
+  if (hasFlushed) return
+  hasFlushed = true
   try {
     await noteStore.flush()
   } catch (err) {
@@ -202,9 +210,11 @@ const flushAndExit = async () => {
 
 app.on('before-quit', (e) => {
   if (!isQuitting) {
+    isQuitting = true
     e.preventDefault()
+    destroyTray()
     flushAndExit().finally(() => {
-      app.quit()
+      app.exit(0)
     })
   }
 })

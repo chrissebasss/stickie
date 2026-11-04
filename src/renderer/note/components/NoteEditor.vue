@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { watch, onBeforeUnmount, ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
 import Underline from '@tiptap/extension-underline'
@@ -15,6 +16,8 @@ import TableCell from '@tiptap/extension-table-cell'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
 import { Extension, type JSONContent } from '@tiptap/vue-3'
+
+const { t } = useI18n()
 
 const props = defineProps<{
   noteId?: string
@@ -66,7 +69,7 @@ const editor = useEditor({
       inline: false
     }),
     Placeholder.configure({
-      placeholder: 'Take a note...'
+      placeholder: () => t('note.placeholder')
     }),
     CustomShortcuts
   ],

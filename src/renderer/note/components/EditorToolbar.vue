@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useI18n } from 'vue-i18n'
 import type { Editor } from '@tiptap/vue-3'
 import {
   Bold,
@@ -23,6 +24,8 @@ const props = defineProps<{
 const emit = defineEmits<{
   (e: 'pickImage'): void
 }>()
+
+const { t } = useI18n()
 
 const showColorMenu = ref(false)
 const showHighlightMenu = ref(false)
@@ -56,7 +59,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg font-bold': editor.isActive('bold') }"
-      title="Bold (Ctrl+B)"
+      :title="t('note.bold')"
       @click="editor.chain().focus().toggleBold().run()"
     >
       <Bold class="w-3.5 h-3.5" />
@@ -66,7 +69,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('italic') }"
-      title="Italic (Ctrl+I)"
+      :title="t('note.italic')"
       @click="editor.chain().focus().toggleItalic().run()"
     >
       <Italic class="w-3.5 h-3.5" />
@@ -76,7 +79,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('underline') }"
-      title="Underline (Ctrl+U)"
+      :title="t('note.underline')"
       @click="editor.chain().focus().toggleUnderline().run()"
     >
       <UnderlineIcon class="w-3.5 h-3.5" />
@@ -86,7 +89,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('strike') }"
-      title="Strikethrough (Ctrl+Shift+X)"
+      :title="t('note.strike')"
       @click="editor.chain().focus().toggleStrike().run()"
     >
       <Strikethrough class="w-3.5 h-3.5" />
@@ -98,7 +101,7 @@ function insertTable() {
     <div class="relative">
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
-        title="Text color"
+        :title="t('note.textColor')"
         @click="showColorMenu = !showColorMenu"
       >
         <Baseline class="w-3.5 h-3.5" />
@@ -122,7 +125,7 @@ function insertTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('highlight') }"
-        title="Highlight"
+        :title="t('note.highlight')"
         @click="showHighlightMenu = !showHighlightMenu"
       >
         <Highlighter class="w-3.5 h-3.5" />
@@ -140,7 +143,7 @@ function insertTable() {
         />
         <button
           class="text-[10px] px-1 border border-black/20 rounded"
-          title="Clear highlight"
+          title="Clear"
           @click="editor.chain().focus().unsetHighlight().run(); showHighlightMenu = false"
         >
           ✕
@@ -154,7 +157,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('bulletList') }"
-      title="Bullet List (Ctrl+Shift+8)"
+      :title="t('note.bulletList')"
       @click="editor.chain().focus().toggleBulletList().run()"
     >
       <List class="w-3.5 h-3.5" />
@@ -164,7 +167,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('orderedList') }"
-      title="Numbered List (Ctrl+Shift+7)"
+      :title="t('note.orderedList')"
       @click="editor.chain().focus().toggleOrderedList().run()"
     >
       <ListOrdered class="w-3.5 h-3.5" />
@@ -174,7 +177,7 @@ function insertTable() {
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
       :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('taskList') }"
-      title="Checklist (Ctrl+Shift+9)"
+      :title="t('note.checklist')"
       @click="editor.chain().focus().toggleTaskList().run()"
     >
       <CheckSquare class="w-3.5 h-3.5" />
@@ -187,7 +190,7 @@ function insertTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('table') }"
-        title="Table options"
+        :title="t('note.table')"
         @click="showTableMenu = !showTableMenu"
       >
         <TableIcon class="w-3.5 h-3.5" />
@@ -195,45 +198,45 @@ function insertTable() {
 
       <div
         v-if="showTableMenu"
-        class="absolute left-0 top-full mt-1 p-1 bg-white dark:bg-stone-800 rounded shadow-lg border border-black/10 dark:border-white/10 flex flex-col space-y-1 z-50 text-[11px] min-w-28 text-stone-800 dark:text-stone-200"
+        class="absolute left-0 top-full mt-1 p-1 bg-white dark:bg-stone-800 rounded shadow-lg border border-black/10 dark:border-white/10 flex flex-col space-y-1 z-50 text-[11px] min-w-32 text-stone-800 dark:text-stone-200"
       >
         <button
           v-if="!editor.isActive('table')"
           class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5"
           @click="insertTable"
         >
-          Insert 3x3 Table
+          {{ t('note.insertTable') }}
         </button>
         <template v-else>
           <button
             class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5"
             @click="editor.chain().focus().addRowAfter().run(); showTableMenu = false"
           >
-            Add Row
+            {{ t('note.addRowBelow') }}
           </button>
           <button
             class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5"
             @click="editor.chain().focus().addColumnAfter().run(); showTableMenu = false"
           >
-            Add Column
+            {{ t('note.addColumnAfter') }}
           </button>
           <button
             class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5 text-red-500"
             @click="editor.chain().focus().deleteRow().run(); showTableMenu = false"
           >
-            Delete Row
+            {{ t('note.deleteRow') }}
           </button>
           <button
             class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5 text-red-500"
             @click="editor.chain().focus().deleteColumn().run(); showTableMenu = false"
           >
-            Delete Column
+            {{ t('note.deleteColumn') }}
           </button>
           <button
             class="px-2 py-1 text-left rounded hover:bg-black/5 dark:hover:bg-white/5 text-red-600 font-semibold border-t border-black/5 dark:border-white/5"
             @click="editor.chain().focus().deleteTable().run(); showTableMenu = false"
           >
-            Delete Table
+            {{ t('note.deleteTable') }}
           </button>
         </template>
       </div>
@@ -242,7 +245,7 @@ function insertTable() {
     <!-- Image -->
     <button
       class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
-      title="Insert image"
+      :title="t('note.image')"
       @click="emit('pickImage')"
     >
       <ImageIcon class="w-3.5 h-3.5" />

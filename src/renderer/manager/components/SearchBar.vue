@@ -1,13 +1,17 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
 import { Search, X } from 'lucide-vue-next'
 
 const props = defineProps<{
   modelValue: string
+  placeholder?: string
 }>()
 
 const emit = defineEmits<{
   (e: 'update:modelValue', value: string): void
 }>()
+
+const { t } = useI18n()
 
 function onInput(event: Event) {
   const target = event.target as HTMLInputElement
@@ -25,7 +29,7 @@ function clear() {
     <input
       type="text"
       :value="modelValue"
-      placeholder="Search notes..."
+      :placeholder="placeholder || t('manager.searchPlaceholder')"
       class="w-full pl-9 pr-8 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 text-sm border border-stone-200 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
       @input="onInput"
     />

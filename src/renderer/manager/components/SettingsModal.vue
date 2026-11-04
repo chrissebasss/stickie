@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { X, Sun, Moon, Laptop } from 'lucide-vue-next'
-import type { Settings, ThemeMode } from '../../../shared/types'
+import { useI18n } from 'vue-i18n'
+import { X, Sun, Moon, Laptop, Languages } from 'lucide-vue-next'
+import type { Settings, ThemeMode, LanguageMode } from '../../../shared/types'
 
 const props = defineProps<{
   settings: Settings
@@ -12,8 +13,14 @@ const emit = defineEmits<{
   (e: 'close'): void
 }>()
 
+const { t } = useI18n()
+
 function setTheme(theme: ThemeMode) {
   emit('update', { theme })
+}
+
+function setLanguage(language: LanguageMode) {
+  emit('update', { language })
 }
 
 function toggleReopen(event: Event) {
@@ -38,7 +45,7 @@ function toggleLogin(event: Event) {
       aria-modal="true"
     >
       <div class="flex items-center justify-between pb-2 border-b border-stone-200 dark:border-stone-700">
-        <h3 class="font-semibold text-stone-900 dark:text-stone-100 text-sm">Settings</h3>
+        <h3 class="font-semibold text-stone-900 dark:text-stone-100 text-sm">{{ t('settings.title') }}</h3>
         <button
           class="p-1 rounded hover:bg-stone-100 dark:hover:bg-stone-700 text-stone-400 hover:text-stone-600 dark:hover:text-stone-200"
           aria-label="Close settings"
@@ -50,7 +57,7 @@ function toggleLogin(event: Event) {
 
       <!-- Theme Switcher -->
       <div class="space-y-2">
-        <label class="text-xs font-medium text-stone-700 dark:text-stone-300">Theme</label>
+        <label class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.theme') }}</label>
         <div class="grid grid-cols-3 gap-2">
           <button
             class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all"
@@ -62,7 +69,7 @@ function toggleLogin(event: Event) {
             @click="setTheme('system')"
           >
             <Laptop class="w-4 h-4 mb-1" />
-            System
+            {{ t('settings.themeSystem') }}
           </button>
 
           <button
@@ -75,7 +82,7 @@ function toggleLogin(event: Event) {
             @click="setTheme('light')"
           >
             <Sun class="w-4 h-4 mb-1" />
-            Light
+            {{ t('settings.themeLight') }}
           </button>
 
           <button
@@ -88,7 +95,52 @@ function toggleLogin(event: Event) {
             @click="setTheme('dark')"
           >
             <Moon class="w-4 h-4 mb-1" />
-            Dark
+            {{ t('settings.themeDark') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Language Switcher -->
+      <div class="space-y-2">
+        <label class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.language') }}</label>
+        <div class="grid grid-cols-3 gap-2">
+          <button
+            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all text-center"
+            :class="
+              (settings.language || 'system') === 'system'
+                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
+            "
+            @click="setLanguage('system')"
+          >
+            <Languages class="w-4 h-4 mb-1" />
+            <span class="truncate w-full">{{ t('settings.langSystem') }}</span>
+          </button>
+
+          <button
+            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all"
+            :class="
+              settings.language === 'en'
+                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
+            "
+            @click="setLanguage('en')"
+          >
+            <span class="text-xs font-bold mb-1">EN</span>
+            {{ t('settings.langEn') }}
+          </button>
+
+          <button
+            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all"
+            :class="
+              settings.language === 'nb'
+                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
+                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
+            "
+            @click="setLanguage('nb')"
+          >
+            <span class="text-xs font-bold mb-1">NO</span>
+            {{ t('settings.langNb') }}
           </button>
         </div>
       </div>
@@ -96,7 +148,7 @@ function toggleLogin(event: Event) {
       <!-- Launch options -->
       <div class="space-y-3 pt-2 border-t border-stone-100 dark:border-stone-700/50">
         <label class="flex items-center justify-between text-xs text-stone-700 dark:text-stone-300 cursor-pointer">
-          <span>Reopen open notes on launch</span>
+          <span>{{ t('settings.reopenOnLaunch') }}</span>
           <input
             type="checkbox"
             :checked="settings.reopenNotesOnLaunch"
@@ -106,7 +158,7 @@ function toggleLogin(event: Event) {
         </label>
 
         <label class="flex items-center justify-between text-xs text-stone-700 dark:text-stone-300 cursor-pointer">
-          <span>Launch at login</span>
+          <span>{{ t('settings.launchAtLogin') }}</span>
           <input
             type="checkbox"
             :checked="settings.launchAtLogin"
@@ -121,7 +173,7 @@ function toggleLogin(event: Event) {
           class="px-3 py-1.5 text-xs font-medium rounded-lg bg-stone-100 dark:bg-stone-700 text-stone-700 dark:text-stone-200 hover:bg-stone-200 dark:hover:bg-stone-600"
           @click="emit('close')"
         >
-          Done
+          {{ t('settings.done') }}
         </button>
       </div>
     </div>

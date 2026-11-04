@@ -5,6 +5,7 @@ import EditorToolbar from './components/EditorToolbar.vue'
 import NoteEditor from './components/NoteEditor.vue'
 import type { Note, NoteColor, JSONContent } from '../../shared/types'
 import { getNoteColorScheme } from '../../shared/color'
+import { setAppLanguage } from '../i18n'
 
 const noteId = ref<string>('')
 const note = ref<Note | null>(null)
@@ -42,6 +43,11 @@ async function loadNote() {
     if (fetched) {
       note.value = fetched
     }
+    const settings = await window.stikly.getSettings()
+    if (settings && settings.language) {
+      setAppLanguage(settings.language)
+    }
+
     const theme = await window.stikly.getTheme()
     isDark.value = theme.resolved === 'dark'
     document.documentElement.setAttribute('data-theme', theme.resolved)

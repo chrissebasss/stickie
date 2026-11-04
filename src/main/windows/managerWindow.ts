@@ -4,7 +4,8 @@ import type { SettingsStore } from '../store/settingsStore'
 
 export function createManagerWindow(
   settingsStore: SettingsStore,
-  onCloseRequest?: () => void
+  onCloseRequest?: () => void,
+  isQuitting?: () => boolean
 ): BrowserWindow {
   const cachedSettings = settingsStore.getCached()
   const savedBounds = cachedSettings.managerBounds
@@ -43,6 +44,9 @@ export function createManagerWindow(
   win.on('resize', saveBounds)
 
   win.on('close', (e) => {
+    if (isQuitting?.()) {
+      return
+    }
     if (onCloseRequest) {
       e.preventDefault()
       onCloseRequest()
