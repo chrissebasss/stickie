@@ -160,7 +160,7 @@ onBeforeUnmount(() => {
 
 <template>
   <div
-    class="h-full w-full flex flex-col overflow-hidden border border-black/15 dark:border-white/10 select-none transition-colors duration-150"
+    class="h-full w-full flex flex-col overflow-hidden border border-black/15 dark:border-white/10 transition-colors duration-150"
     :style="rootStyle"
     style="background-color: var(--note-bg); color: var(--note-fg);"
   >
@@ -192,6 +192,7 @@ onBeforeUnmount(() => {
         ref="editorComponent"
         :note-id="note.id"
         :initial-content="note.content"
+        :editable="true"
         @update="onEditorUpdate"
       />
     </div>

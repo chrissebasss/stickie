@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { watch, onBeforeUnmount, ref } from 'vue'
+import { watch, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
@@ -19,11 +19,16 @@ import { Extension, type JSONContent } from '@tiptap/vue-3'
 
 const { t } = useI18n()
 
-const props = defineProps<{
-  noteId?: string
-  initialContent?: JSONContent
-  editable?: boolean
-}>()
+const props = withDefaults(
+  defineProps<{
+    noteId?: string
+    initialContent?: JSONContent
+    editable?: boolean
+  }>(),
+  {
+    editable: true
+  }
+)
 
 const emit = defineEmits<{
   (e: 'update', payload: { content: JSONContent; plainText: string }): void
@@ -45,7 +50,8 @@ const CustomShortcuts = Extension.create({
 
 const editor = useEditor({
   content: props.initialContent || { type: 'doc', content: [{ type: 'paragraph' }] },
-  editable: props.editable ?? true,
+  editable: props.editable !== false,
+  autofocus: 'end',
   extensions: [
     StarterKit.configure({
       heading: { levels: [1, 2, 3] }
@@ -137,6 +143,21 @@ watch(
   }
 )
 
+watch(
+  () => props.editable,
+  (val) => {
+    if (editor.value) {
+      editor.value.setEditable(val !== false)
+    }
+  }
+)
+
+onMounted(() => {
+  if (editor.value) {
+    editor.value.setEditable(props.editable !== false)
+  }
+})
+
 function onWrapperClick(event: MouseEvent) {
   const target = event.target as HTMLElement
   if (target && !target.closest('button, input, select, a, table')) {
@@ -177,12 +198,16 @@ onBeforeUnmount(() => {
   height: 100%;
 }
 
-.ProseMirror {
+.ProseMirror,
+.ProseMirror * {
   outline: none;
-  min-height: 100%;
-  cursor: text;
   user-select: text !important;
   -webkit-user-select: text !important;
+}
+
+.ProseMirror {
+  min-height: 100%;
+  cursor: text;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

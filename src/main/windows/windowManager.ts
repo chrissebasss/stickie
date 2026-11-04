@@ -74,6 +74,7 @@ export class WindowManager {
 
     win.once('ready-to-show', () => {
       win.show()
+      win.focus()
     })
 
     // Debounced bounds saving on move and resize
