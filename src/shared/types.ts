@@ -1,4 +1,5 @@
 import type { JSONContent } from '@tiptap/vue-3'
+export type { JSONContent }
 
 export type PresetColorId = 'yellow' | 'green' | 'blue' | 'pink'
 

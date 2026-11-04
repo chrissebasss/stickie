@@ -1,5 +1,10 @@
 import { app, BrowserWindow } from 'electron'
 import { join } from 'path'
+import { NoteStore } from './store/noteStore'
+import { SettingsStore } from './store/settingsStore'
+import { WindowManager } from './windows/windowManager'
+import { createManagerWindow } from './windows/managerWindow'
+import { registerIpcHandlers, applyTheme } from './ipc'
 
 // Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
 if (process.platform === 'linux') {
@@ -13,53 +18,79 @@ if (!gotTheLock) {
   app.quit()
 }
 
-let managerWindow: BrowserWindow | null = null
+const storageDir = join(app.getPath('userData'), 'Stikly')
+const noteStore = new NoteStore(storageDir)
+const settingsStore = new SettingsStore(storageDir)
+const windowManager = new WindowManager(noteStore, settingsStore)
 
-function createManagerWindow(): BrowserWindow {
-  const win = new BrowserWindow({
-    width: 800,
-    height: 600,
-    minWidth: 480,
-    minHeight: 360,
-    title: 'Stikly - My Notes',
-    show: false,
-    autoHideMenuBar: true,
-    webPreferences: {
-      preload: join(__dirname, '../preload/index.js'),
-      sandbox: true,
-      contextIsolation: true,
-      nodeIntegration: false
+let isQuitting = false
+
+app.whenReady().then(async () => {
+  await noteStore.init()
+  const settings = await settingsStore.load()
+  applyTheme(settings.theme)
+
+  registerIpcHandlers(noteStore, settingsStore, windowManager)
+
+  // Always open manager window on startup (AGENTS.md 4.8)
+  const managerWin = createManagerWindow(settingsStore)
+  windowManager.setManagerWindow(managerWin)
+
+  // Optionally reopen notes that were open at last exit (default false)
+  if (settings.reopenNotesOnLaunch && settings.openNoteIds.length > 0) {
+    for (const noteId of settings.openNoteIds) {
+      await windowManager.openNote(noteId)
     }
-  })
-
-  win.on('ready-to-show', () => {
-    win.show()
-  })
-
-  if (process.env.ELECTRON_RENDERER_URL) {
-    win.loadURL(`${process.env.ELECTRON_RENDERER_URL}/manager/index.html`)
-  } else {
-    win.loadFile(join(__dirname, '../renderer/manager/index.html'))
   }
 
-  return win
-}
-
-app.whenReady().then(() => {
-  managerWindow = createManagerWindow()
-
   app.on('second-instance', () => {
-    if (managerWindow) {
-      if (managerWindow.isMinimized()) managerWindow.restore()
-      managerWindow.focus()
+    const mgr = windowManager.getManagerWindow()
+    if (mgr) {
+      if (mgr.isMinimized()) mgr.restore()
+      mgr.show()
+      mgr.focus()
+    } else {
+      const newMgr = createManagerWindow(settingsStore)
+      windowManager.setManagerWindow(newMgr)
     }
   })
 
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) {
-      managerWindow = createManagerWindow()
+      const newMgr = createManagerWindow(settingsStore)
+      windowManager.setManagerWindow(newMgr)
     }
   })
+})
+
+// Flush-on-exit handlers (AGENTS.md 4.5b)
+const flushAndExit = async () => {
+  if (isQuitting) return
+  isQuitting = true
+  try {
+    await noteStore.flush()
+  } catch (err) {
+    console.error('[App] Error during exit flush:', err)
+  }
+}
+
+app.on('before-quit', (e) => {
+  if (!isQuitting) {
+    e.preventDefault()
+    flushAndExit().finally(() => {
+      app.quit()
+    })
+  }
+})
+
+process.on('SIGTERM', async () => {
+  await flushAndExit()
+  process.exit(0)
+})
+
+process.on('SIGINT', async () => {
+  await flushAndExit()
+  process.exit(0)
 })
 
 app.on('window-all-closed', () => {

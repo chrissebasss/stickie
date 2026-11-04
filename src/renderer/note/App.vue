@@ -1,38 +1,134 @@
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
+import NoteBar from './components/NoteBar.vue'
+import EditorToolbar from './components/EditorToolbar.vue'
+import NoteEditor from './components/NoteEditor.vue'
+import type { Note, NoteColor, JSONContent } from '../../shared/types'
+import { getNoteColorScheme } from '../../shared/color'
 
 const noteId = ref<string>('')
+const note = ref<Note | null>(null)
+const isDark = ref<boolean>(false)
+const showToolbar = ref<boolean>(true)
+const editorComponent = ref<InstanceType<typeof NoteEditor> | null>(null)
 
-function closeNote(): void {
-  if (noteId.value && window.stikly) {
-    window.stikly.closeNote(noteId.value)
+const editorInstance = computed(() => editorComponent.value?.editor)
+
+const colorScheme = computed(() => {
+  const noteColor: NoteColor = note.value?.color || { kind: 'preset', id: 'yellow' }
+  return getNoteColorScheme(noteColor, isDark.value)
+})
+
+const rootStyle = computed(() => {
+  const s = colorScheme.value
+  return {
+    '--note-bg': s.bg,
+    '--note-fg': s.fg,
+    '--bar-bg': s.barBg,
+    '--bar-fg': s.barFg
+  }
+})
+
+async function loadNote() {
+  const params = new URLSearchParams(window.location.search)
+  const id = params.get('id')
+  if (!id) return
+  noteId.value = id
+
+  if (window.stikly) {
+    const fetched = await window.stikly.getNote(id)
+    if (fetched) {
+      note.value = fetched
+    }
+    const theme = await window.stikly.getTheme()
+    isDark.value = theme.resolved === 'dark'
+    document.documentElement.setAttribute('data-theme', theme.resolved)
+
+    window.stikly.onThemeChanged((t) => {
+      isDark.value = t.resolved === 'dark'
+      document.documentElement.setAttribute('data-theme', t.resolved)
+    })
   }
 }
 
-onMounted(async () => {
-  const params = new URLSearchParams(window.location.search)
-  noteId.value = params.get('id') || ''
+function onEditorUpdate({ content, plainText }: { content: JSONContent; plainText: string }) {
+  if (!note.value) return
+  note.value.content = content
+  note.value.plainText = plainText
+  if (window.stikly) {
+    window.stikly.saveNote(note.value)
+  }
+}
+
+async function togglePin() {
+  if (!note.value || !window.stikly) return
+  const currentPin = note.value.alwaysOnTop ?? false
+  note.value.alwaysOnTop = !currentPin
+  await window.stikly.setNotePin(note.value.id, note.value.alwaysOnTop)
+}
+
+async function updateColor(color: NoteColor) {
+  if (!note.value || !window.stikly) return
+  note.value.color = color
+  await window.stikly.updateNoteColor(note.value.id, color)
+}
+
+async function closeNote() {
+  if (!note.value || !window.stikly) return
+  await window.stikly.closeNote(note.value.id)
+}
+
+async function createNewNote() {
+  if (!window.stikly) return
+  await window.stikly.createNote()
+}
+
+async function handlePickImage() {
+  if (!note.value || !window.stikly) return
+  const assetUrl = await window.stikly.pickImage(note.value.id)
+  if (assetUrl && editorInstance.value) {
+    editorInstance.value.chain().focus().setImage({ src: assetUrl }).run()
+  }
+}
+
+onMounted(() => {
+  loadNote()
 })
 </script>
 
 <template>
-  <div class="h-full w-full flex flex-col bg-note-bg text-note-fg rounded-lg shadow-lg overflow-hidden border border-black/10 dark:border-white/10">
-    <div
-      class="h-8 bg-note-bar text-note-barFg px-3 flex items-center justify-between select-none"
-      style="-webkit-app-region: drag;"
-    >
-      <span class="text-xs font-medium opacity-70">Sticky Note</span>
-      <div class="flex items-center space-x-1" style="-webkit-app-region: no-drag;">
-        <button
-          class="w-5 h-5 rounded hover:bg-black/10 dark:hover:bg-white/10 flex items-center justify-center text-xs"
-          @click="closeNote"
-        >
-          ✕
-        </button>
-      </div>
-    </div>
-    <div class="flex-1 p-3 overflow-auto">
-      <p class="text-sm">Note placeholder</p>
+  <div
+    class="h-full w-full flex flex-col overflow-hidden rounded-lg shadow-xl border border-black/10 dark:border-white/10 transition-colors duration-150"
+    :style="rootStyle"
+    style="background-color: var(--note-bg); color: var(--note-fg);"
+  >
+    <!-- Top draggable bar -->
+    <NoteBar
+      v-if="note"
+      :note-id="note.id"
+      :always-on-top="note.alwaysOnTop ?? false"
+      :color="note.color"
+      @toggle-pin="togglePin"
+      @update-color="updateColor"
+      @close="closeNote"
+      @new-note="createNewNote"
+    />
+
+    <!-- Formatting Toolbar (can be toggled) -->
+    <EditorToolbar
+      v-if="showToolbar"
+      :editor="editorInstance"
+      @pick-image="handlePickImage"
+    />
+
+    <!-- TipTap Editor -->
+    <div class="flex-1 overflow-hidden">
+      <NoteEditor
+        v-if="note"
+        ref="editorComponent"
+        :initial-content="note.content"
+        @update="onEditorUpdate"
+      />
     </div>
   </div>
 </template>
