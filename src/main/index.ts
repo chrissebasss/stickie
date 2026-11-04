@@ -1,6 +1,7 @@
 import { app, BrowserWindow, protocol, net } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
+import { v4 as uuidv4 } from 'uuid'
 import { NoteStore } from './store/noteStore'
 import { SettingsStore } from './store/settingsStore'
 import { WindowManager } from './windows/windowManager'
@@ -8,6 +9,7 @@ import { createManagerWindow } from './windows/managerWindow'
 import { registerIpcHandlers, applyTheme } from './ipc'
 import { setupDisplayListeners } from './displays'
 import { getAssetDiskPath } from './store/assets'
+import { setupTray, getTray } from './tray'
 
 // Register custom protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -65,9 +67,62 @@ app.whenReady().then(async () => {
   registerIpcHandlers(noteStore, settingsStore, windowManager)
   setupDisplayListeners(windowManager, noteStore)
 
+  const onManagerClose = () => {
+    const mgr = windowManager.getManagerWindow()
+    if (!mgr) return
+    if (getTray()) {
+      mgr.hide()
+    } else {
+      if (windowManager.getOpenNoteIds().length === 0) {
+        app.quit()
+      } else {
+        mgr.hide()
+      }
+    }
+  }
+
+  const showManager = () => {
+    let mgr = windowManager.getManagerWindow()
+    if (!mgr || mgr.isDestroyed()) {
+      mgr = createManagerWindow(settingsStore, onManagerClose)
+      windowManager.setManagerWindow(mgr)
+    }
+    if (mgr.isMinimized()) mgr.restore()
+    mgr.show()
+    mgr.focus()
+  }
+
   // Always open manager window on startup (AGENTS.md 4.8)
-  const managerWin = createManagerWindow(settingsStore)
+  const managerWin = createManagerWindow(settingsStore, onManagerClose)
   windowManager.setManagerWindow(managerWin)
+
+  setupTray({
+    onNewNote: async () => {
+      const id = uuidv4()
+      const newNote = {
+        schemaVersion: 1 as const,
+        id,
+        title: 'Untitled note',
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        color: { kind: 'preset' as const, id: 'yellow' as const },
+        bounds: { x: 120, y: 120, width: 320, height: 360 },
+        content: { type: 'doc', content: [{ type: 'paragraph' }] },
+        plainText: '',
+        alwaysOnTop: false
+      }
+      await noteStore.saveNoteNow(newNote)
+      await windowManager.openNote(newNote.id)
+    },
+    onShowManager: showManager,
+    onCloseAllNotes: async () => {
+      await noteStore.flush()
+      windowManager.closeAllNotes()
+    },
+    onQuit: () => {
+      app.quit()
+    }
+  })
 
   // Optionally reopen notes that were open at last exit (default false)
   if (settings.reopenNotesOnLaunch && settings.openNoteIds.length > 0) {
