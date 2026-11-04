@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import NoteBar from './components/NoteBar.vue'
 import EditorToolbar from './components/EditorToolbar.vue'
 import NoteEditor from './components/NoteEditor.vue'
@@ -47,6 +47,10 @@ async function loadNote() {
     window.stikly.onThemeChanged((t) => {
       isDark.value = t.resolved === 'dark'
       document.documentElement.setAttribute('data-theme', t.resolved)
+    })
+
+    nextTick(() => {
+      editorInstance.value?.commands.focus('end')
     })
   }
 }
@@ -124,7 +128,7 @@ onMounted(() => {
     />
 
     <!-- TipTap Editor -->
-    <div class="flex-1 overflow-hidden">
+    <div class="flex-1 overflow-hidden flex flex-col">
       <NoteEditor
         v-if="note"
         ref="editorComponent"

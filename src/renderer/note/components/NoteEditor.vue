@@ -134,6 +134,15 @@ watch(
   }
 )
 
+function onWrapperClick(event: MouseEvent) {
+  const target = event.target as HTMLElement
+  if (target && !target.closest('button, input, select, a, table')) {
+    if (editor.value && !editor.value.isFocused) {
+      editor.value.commands.focus('end')
+    }
+  }
+}
+
 defineExpose({
   editor
 })
@@ -144,16 +153,33 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="note-editor-wrapper h-full flex flex-col overflow-hidden text-sm">
-    <editor-content :editor="editor" class="flex-1 overflow-y-auto px-3 py-2 outline-none" />
+  <div
+    class="note-editor-wrapper h-full flex-1 flex flex-col overflow-hidden text-sm cursor-text"
+    @click="onWrapperClick"
+  >
+    <editor-content
+      :editor="editor"
+      class="flex-1 h-full overflow-y-auto px-3 py-2 outline-none cursor-text"
+    />
   </div>
 </template>
 
 <style>
 /* ProseMirror TipTap Custom Styles */
+.note-editor-wrapper {
+  height: 100%;
+}
+
+.note-editor-wrapper > div {
+  height: 100%;
+}
+
 .ProseMirror {
   outline: none;
   min-height: 100%;
+  cursor: text;
+  user-select: text !important;
+  -webkit-user-select: text !important;
 }
 
 .ProseMirror p.is-editor-empty:first-child::before {

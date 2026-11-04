@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, net } from 'electron'
+import { app, BrowserWindow, protocol, net, Menu, MenuItem } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { v4 as uuidv4 } from 'uuid'
@@ -63,6 +63,44 @@ app.whenReady().then(async () => {
   await noteStore.init()
   const settings = await settingsStore.load()
   applyTheme(settings.theme)
+
+  // Register application edit menu so standard keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
+  // work natively across all windows, including frameless sticky notes.
+  const menuTemplate: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: 'Edit',
+      submenu: [
+        { role: 'undo' },
+        { role: 'redo' },
+        { type: 'separator' },
+        { role: 'cut' },
+        { role: 'copy' },
+        { role: 'paste' },
+        { role: 'selectAll' }
+      ]
+    }
+  ]
+  Menu.setApplicationMenu(Menu.buildFromTemplate(menuTemplate))
+
+  // Context menu for right-click Cut, Copy, Paste
+  app.on('web-contents-created', (_, contents) => {
+    contents.on('context-menu', (_, params) => {
+      const contextMenu = new Menu()
+      if (params.isEditable) {
+        contextMenu.append(new MenuItem({ role: 'undo' }))
+        contextMenu.append(new MenuItem({ role: 'redo' }))
+        contextMenu.append(new MenuItem({ type: 'separator' }))
+        contextMenu.append(new MenuItem({ role: 'cut' }))
+        contextMenu.append(new MenuItem({ role: 'copy' }))
+        contextMenu.append(new MenuItem({ role: 'paste' }))
+        contextMenu.append(new MenuItem({ role: 'selectAll' }))
+        contextMenu.popup()
+      } else if (params.selectionText && params.selectionText.trim().length > 0) {
+        contextMenu.append(new MenuItem({ role: 'copy' }))
+        contextMenu.popup()
+      }
+    })
+  })
 
   registerIpcHandlers(noteStore, settingsStore, windowManager)
   setupDisplayListeners(windowManager, noteStore)

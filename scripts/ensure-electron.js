@@ -30,3 +30,4 @@ try {
 } catch (err) {
   console.warn('Notice: Could not automatically extract cached Electron:', err.message);
 }
+
