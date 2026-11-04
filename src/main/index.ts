@@ -5,6 +5,7 @@ import { SettingsStore } from './store/settingsStore'
 import { WindowManager } from './windows/windowManager'
 import { createManagerWindow } from './windows/managerWindow'
 import { registerIpcHandlers, applyTheme } from './ipc'
+import { setupDisplayListeners } from './displays'
 
 // Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
 if (process.platform === 'linux') {
@@ -31,6 +32,7 @@ app.whenReady().then(async () => {
   applyTheme(settings.theme)
 
   registerIpcHandlers(noteStore, settingsStore, windowManager)
+  setupDisplayListeners(windowManager, noteStore)
 
   // Always open manager window on startup (AGENTS.md 4.8)
   const managerWin = createManagerWindow(settingsStore)

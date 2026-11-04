@@ -3,6 +3,7 @@ import { join } from 'path'
 import type { Note, Bounds } from '../../shared/types'
 import type { NoteStore } from '../store/noteStore'
 import type { SettingsStore } from '../store/settingsStore'
+import { ensureVisible, getDisplayTopology } from '../displays'
 
 export class WindowManager {
   private noteWindows: Map<string, BrowserWindow> = new Map()
@@ -44,7 +45,9 @@ export class WindowManager {
     }
 
     const note = await this.noteStore.getNote(noteId)
-    const bounds = customBounds || note?.bounds || this.getNextCascadeBounds()
+    const rawBounds = customBounds || note?.bounds || this.getNextCascadeBounds()
+    const { workAreas, primary } = getDisplayTopology()
+    const bounds = ensureVisible(rawBounds, workAreas, primary, this.lastCascadeOffset)
 
     const win = new BrowserWindow({
       x: bounds.x,
