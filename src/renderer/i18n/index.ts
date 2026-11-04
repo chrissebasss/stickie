@@ -34,3 +34,4 @@ export function setAppLanguage(preference: LanguageMode | string): void {
     document.documentElement.setAttribute('lang', resolved)
   }
 }
+

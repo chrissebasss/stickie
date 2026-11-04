@@ -62,10 +62,14 @@ export function createManagerWindow(
     const devUrl = `${process.env.ELECTRON_RENDERER_URL}/manager/index.html`
     win.loadURL(devUrl).catch((err) => {
       console.warn(`[ManagerWindow] Could not load dev server URL ${devUrl}, falling back to built bundle:`, err)
-      win.loadFile(distPath).catch(console.error)
+      if (!win.isDestroyed()) {
+        win.loadFile(distPath).catch(console.error)
+      }
     })
   } else {
-    win.loadFile(distPath).catch(console.error)
+    if (!win.isDestroyed()) {
+      win.loadFile(distPath).catch(console.error)
+    }
   }
 
   return win

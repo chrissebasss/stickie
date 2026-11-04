@@ -118,13 +118,17 @@ export class WindowManager {
       } catch (err) {
         console.warn(`[WindowManager] Could not load dev server URL ${devUrl}, falling back to built bundle:`, err)
         try {
-          await win.loadFile(distPath, { query: { id: noteId } })
+          if (!win.isDestroyed()) {
+            await win.loadFile(distPath, { query: { id: noteId } })
+          }
         } catch (fileErr) {
           console.error(`[WindowManager] Fallback loadFile also failed:`, fileErr)
         }
       }
     } else {
-      await win.loadFile(distPath, { query: { id: noteId } })
+      if (!win.isDestroyed()) {
+        await win.loadFile(distPath, { query: { id: noteId } })
+      }
     }
 
     this.syncOpenNoteIdsToSettings()

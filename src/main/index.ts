@@ -33,7 +33,7 @@ if (process.platform === 'linux') {
 // Single-instance lock
 const gotTheLock = app.requestSingleInstanceLock()
 if (!gotTheLock) {
-  app.quit()
+  app.exit(0)
 }
 
 const storageDir = join(app.getPath('userData'), 'Stikly')
