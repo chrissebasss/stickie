@@ -249,3 +249,4 @@ function insertTable() {
     </button>
   </div>
 </template>
+

@@ -71,3 +71,4 @@ describe('isNoteEmpty', () => {
     expect(isNoteEmpty('', imageDoc)).toBe(false)
   })
 })
+

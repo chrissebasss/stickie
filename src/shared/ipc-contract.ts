@@ -76,3 +76,4 @@ export interface StiklyAPI {
   importFiles: () => Promise<string[]>
   exportNote: (noteId: string, format: 'json' | 'md') => Promise<boolean>
 }
+

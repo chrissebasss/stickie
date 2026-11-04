@@ -169,3 +169,4 @@ describe('NoteStore', () => {
     expect(reloaded?.plainText).toBe('Original text')
   })
 })
+

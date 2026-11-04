@@ -99,3 +99,4 @@ Wayland compositor security models typically prevent desktop applications from p
 
 ## License
 MIT
+

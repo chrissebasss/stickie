@@ -61,3 +61,4 @@ export function createManagerWindow(
 
   return win
 }
+

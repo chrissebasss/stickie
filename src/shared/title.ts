@@ -51,3 +51,4 @@ function hasImageNodes(node: JSONContent): boolean {
   }
   return false
 }
+

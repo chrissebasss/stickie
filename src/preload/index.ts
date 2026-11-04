@@ -72,3 +72,4 @@ const api: StiklyAPI = {
 }
 
 contextBridge.exposeInMainWorld('stikly', api)
+

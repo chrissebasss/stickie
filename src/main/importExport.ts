@@ -112,3 +112,4 @@ export async function exportNoteToFile(
   await fs.writeFile(result.filePath, content, 'utf-8')
   return true
 }
+

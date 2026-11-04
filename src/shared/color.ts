@@ -124,3 +124,4 @@ export function getNoteColorScheme(color: NoteColor, isDark: boolean): ColorSche
   const barFg = pickTextColor(barBg)
   return { bg, fg, barBg, barFg }
 }
+

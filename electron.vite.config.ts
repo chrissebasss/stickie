@@ -2,6 +2,9 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 
+// Unset ELECTRON_RUN_AS_NODE if inherited from IDE/terminal harness
+delete process.env.ELECTRON_RUN_AS_NODE
+
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
@@ -39,3 +42,4 @@ export default defineConfig({
     }
   }
 })
+

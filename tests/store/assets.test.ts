@@ -87,3 +87,4 @@ describe('assets store', () => {
     expect(getAssetDiskPath(testDir, '..', 'image.png')).toBeNull()
   })
 })
+

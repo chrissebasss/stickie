@@ -77,3 +77,4 @@ describe('atomicFile', () => {
     await expect(fs.access(`${targetFile}.tmp`)).rejects.toThrow()
   })
 })
+

@@ -74,3 +74,4 @@ export class SettingsStore {
     return currentData as Settings
   }
 }
+

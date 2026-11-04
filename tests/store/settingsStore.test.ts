@@ -55,3 +55,4 @@ describe('SettingsStore', () => {
     expect(loaded.theme).toBe('light')
   })
 })
+

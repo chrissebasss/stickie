@@ -59,3 +59,4 @@ jobs:
             dist/*.exe
             dist/*.AppImage
             dist/*.deb
+
