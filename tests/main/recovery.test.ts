@@ -9,7 +9,7 @@ describe('Hardening: Kill & Crash Recovery', () => {
   let testDir: string
 
   beforeEach(async () => {
-    testDir = await fs.mkdtemp(join(tmpdir(), 'stikly-test-recovery-'))
+    testDir = await fs.mkdtemp(join(tmpdir(), 'stickie-test-recovery-'))
   })
 
   afterEach(async () => {

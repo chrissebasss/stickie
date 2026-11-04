@@ -157,9 +157,9 @@ export function parseHtmlToNote(rawHtml: string, filename?: string): ParsedNoteR
     content:
       paragraphs.length > 0
         ? paragraphs.map((text) => ({
-            type: 'paragraph',
-            content: [{ type: 'text', text }]
-          }))
+          type: 'paragraph',
+          content: [{ type: 'text', text }]
+        }))
         : [{ type: 'paragraph', content: textContent ? [{ type: 'text', text: textContent }] : [] }]
   }
 
@@ -170,7 +170,7 @@ export function parseHtmlToNote(rawHtml: string, filename?: string): ParsedNoteR
   }
 }
 
-export function parseStiklyJson(rawJson: string): Partial<Note> | null {
+export function parseStickieJson(rawJson: string): Partial<Note> | null {
   try {
     const data = JSON.parse(rawJson)
     if (data && typeof data === 'object') {

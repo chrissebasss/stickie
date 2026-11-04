@@ -12,7 +12,7 @@ describe('atomicFile', () => {
   let testDir: string
 
   beforeEach(async () => {
-    testDir = await fs.mkdtemp(join(tmpdir(), 'stikly-test-atomic-'))
+    testDir = await fs.mkdtemp(join(tmpdir(), 'stickie-test-atomic-'))
   })
 
   afterEach(async () => {

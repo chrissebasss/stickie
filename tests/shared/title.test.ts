@@ -14,8 +14,8 @@ describe('deriveTitle', () => {
   })
 
   it('collapses multiple whitespace characters', () => {
-    const text = 'Hello    world   from    Stikly'
-    expect(deriveTitle(text)).toBe('Hello world from Stikly')
+    const text = 'Hello    world   from    Stickie'
+    expect(deriveTitle(text)).toBe('Hello world from Stickie')
   })
 
   it('truncates at 60 characters and appends ellipsis', () => {
@@ -64,7 +64,7 @@ describe('isNoteEmpty', () => {
       content: [
         {
           type: 'image',
-          attrs: { src: 'stikly-asset://abc/def.png' }
+          attrs: { src: 'stickie-asset://abc/def.png' }
         }
       ]
     }

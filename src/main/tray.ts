@@ -16,7 +16,7 @@ export function setupTray(callbacks: TrayCallbacks): Tray | null {
     const icon = nativeImage.createFromPath(iconPath)
 
     trayInstance = new Tray(icon)
-    trayInstance.setToolTip('Stikly')
+    trayInstance.setToolTip('Stickie')
 
     const contextMenu = Menu.buildFromTemplate([
       {

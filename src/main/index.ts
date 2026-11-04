@@ -14,7 +14,7 @@ import { setupTray, getTray, destroyTray } from './tray'
 // Register custom protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
   {
-    scheme: 'stikly-asset',
+    scheme: 'stickie-asset',
     privileges: {
       secure: true,
       standard: true,
@@ -26,7 +26,7 @@ protocol.registerSchemesAsPrivileged([
 
 // Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
 if (process.platform === 'linux') {
-  const ozonePlatform = process.env.STIKLY_OZONE || 'x11'
+  const ozonePlatform = process.env.STICKIE_OZONE || 'x11'
   app.commandLine.appendSwitch('ozone-platform-hint', ozonePlatform)
 }
 
@@ -36,7 +36,7 @@ if (!gotTheLock) {
   app.exit(0)
 }
 
-const storageDir = join(app.getPath('userData'), 'Stikly')
+const storageDir = join(app.getPath('userData'), 'Stickie')
 const noteStore = new NoteStore(storageDir)
 const settingsStore = new SettingsStore(storageDir)
 const windowManager = new WindowManager(noteStore, settingsStore)
@@ -44,7 +44,7 @@ const windowManager = new WindowManager(noteStore, settingsStore)
 let isQuitting = false
 
 app.whenReady().then(async () => {
-  protocol.handle('stikly-asset', async (request) => {
+  protocol.handle('stickie-asset', async (request) => {
     try {
       const url = new URL(request.url)
       const noteId = url.host
@@ -55,7 +55,7 @@ app.whenReady().then(async () => {
       }
       return net.fetch(pathToFileURL(diskPath).toString())
     } catch (err) {
-      console.error('[Protocol] Error handling stikly-asset:', err)
+      console.error('[Protocol] Error handling stickie-asset:', err)
       return new Response('Internal error', { status: 500 })
     }
   })

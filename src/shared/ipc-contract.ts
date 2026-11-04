@@ -44,7 +44,7 @@ export const IPC_CHANNELS = {
   EVENT_NOTE_UPDATED: 'event:note-updated'
 } as const
 
-export interface StiklyAPI {
+export interface StickieAPI {
   // Note specific
   getNote: (noteId: string) => Promise<Note | null>
   saveNote: (note: Note) => Promise<void>

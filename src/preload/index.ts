@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
-import { IPC_CHANNELS, type StiklyAPI } from '../shared/ipc-contract'
+import { IPC_CHANNELS, type StickieAPI } from '../shared/ipc-contract'
 import type {
   Note,
   NoteIndexItem,
@@ -10,7 +10,7 @@ import type {
   NoteColor
 } from '../shared/types'
 
-const api: StiklyAPI = {
+const api: StickieAPI = {
   getNote: (noteId: string) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_GET, noteId),
   saveNote: (note: Note) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_SAVE, note),
   closeNote: (noteId: string, currentNote?: Note) =>
@@ -72,5 +72,5 @@ const api: StiklyAPI = {
     ipcRenderer.invoke(IPC_CHANNELS.EXPORT_NOTE, noteId, format)
 }
 
-contextBridge.exposeInMainWorld('stikly', api)
+contextBridge.exposeInMainWorld('stickie', api)
 

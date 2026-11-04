@@ -54,7 +54,7 @@ jobs:
       - name: Upload packaging artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: stikly-${{ matrix.platform }}
+          name: stickie-${{ matrix.platform }}
           path: |
             dist/*.exe
             dist/*.AppImage

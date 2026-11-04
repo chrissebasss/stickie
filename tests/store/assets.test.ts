@@ -15,21 +15,21 @@ describe('assets store', () => {
   let testDir: string
 
   beforeEach(async () => {
-    testDir = await fs.mkdtemp(join(tmpdir(), 'stikly-test-assets-'))
+    testDir = await fs.mkdtemp(join(tmpdir(), 'stickie-test-assets-'))
   })
 
   afterEach(async () => {
     await fs.rm(testDir, { recursive: true, force: true })
   })
 
-  it('saves asset buffer and returns stikly-asset URL', async () => {
+  it('saves asset buffer and returns stickie-asset URL', async () => {
     const buffer = Buffer.from('fake-image-bytes')
     const url = await saveAssetBuffer(testDir, 'note-123', buffer, 'png')
 
-    expect(url.startsWith('stikly-asset://note-123/')).toBe(true)
+    expect(url.startsWith('stickie-asset://note-123/')).toBe(true)
     expect(url.endsWith('.png')).toBe(true)
 
-    const filename = url.replace('stikly-asset://note-123/', '')
+    const filename = url.replace('stickie-asset://note-123/', '')
     const diskPath = getAssetDiskPath(testDir, 'note-123', filename)
     expect(diskPath).not.toBeNull()
 
@@ -45,8 +45,8 @@ describe('assets store', () => {
     const url1 = await saveAssetBuffer(testDir, noteId, buf1, 'png')
     const url2 = await saveAssetBuffer(testDir, noteId, buf2, 'png')
 
-    const file1 = url1.replace(`stikly-asset://${noteId}/`, '')
-    const file2 = url2.replace(`stikly-asset://${noteId}/`, '')
+    const file1 = url1.replace(`stickie-asset://${noteId}/`, '')
+    const file2 = url2.replace(`stickie-asset://${noteId}/`, '')
 
     // Only file1 is kept
     await cleanOrphanAssets(testDir, noteId, new Set([file1]))
@@ -68,7 +68,7 @@ describe('assets store', () => {
         },
         {
           type: 'image',
-          attrs: { src: 'stikly-asset://note-xyz/abc12345.png' }
+          attrs: { src: 'stickie-asset://note-xyz/abc12345.png' }
         },
         {
           type: 'image',

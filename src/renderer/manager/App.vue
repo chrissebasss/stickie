@@ -35,23 +35,23 @@ const settings = ref<Settings>({
 })
 
 onMounted(async () => {
-  if (window.stikly) {
-    notes.value = await window.stikly.listNotes()
-    settings.value = await window.stikly.getSettings()
+  if (window.stickie) {
+    notes.value = await window.stickie.listNotes()
+    settings.value = await window.stickie.getSettings()
 
     if (settings.value.language) {
       setAppLanguage(settings.value.language)
     }
 
-    const theme = await window.stikly.getTheme()
+    const theme = await window.stickie.getTheme()
     isDark.value = theme.resolved === 'dark'
     document.documentElement.setAttribute('data-theme', theme.resolved)
 
-    window.stikly.onIndexUpdated((updatedNotes) => {
+    window.stickie.onIndexUpdated((updatedNotes) => {
       notes.value = updatedNotes
     })
 
-    window.stikly.onThemeChanged((t) => {
+    window.stickie.onThemeChanged((t) => {
       isDark.value = t.resolved === 'dark'
       document.documentElement.setAttribute('data-theme', t.resolved)
     })
@@ -82,23 +82,23 @@ const filteredNotes = computed(() => {
 })
 
 async function createNote() {
-  if (window.stikly) {
-    await window.stikly.createNote()
+  if (window.stickie) {
+    await window.stickie.createNote()
   }
 }
 
 async function toggleNote(noteItem: NoteIndexItem) {
-  if (!window.stikly) return
+  if (!window.stickie) return
   if (noteItem.isOpen) {
-    await window.stikly.closeNote(noteItem.id)
+    await window.stickie.closeNote(noteItem.id)
   } else {
-    await window.stikly.openNote(noteItem.id)
+    await window.stickie.openNote(noteItem.id)
   }
 }
 
 async function closeAllNotes() {
-  if (window.stikly) {
-    await window.stikly.closeAllNotes()
+  if (window.stickie) {
+    await window.stickie.closeAllNotes()
   }
 }
 
@@ -107,15 +107,15 @@ function promptDelete(note: NoteIndexItem) {
 }
 
 async function confirmDelete() {
-  if (noteToDelete.value && window.stikly) {
-    await window.stikly.deleteNote(noteToDelete.value.id)
+  if (noteToDelete.value && window.stickie) {
+    await window.stickie.deleteNote(noteToDelete.value.id)
     noteToDelete.value = null
   }
 }
 
 async function updateSettings(patch: Partial<Settings>) {
-  if (window.stikly) {
-    settings.value = await window.stikly.updateSettings(patch)
+  if (window.stickie) {
+    settings.value = await window.stickie.updateSettings(patch)
     if (patch.language) {
       setAppLanguage(patch.language)
     }
@@ -123,14 +123,14 @@ async function updateSettings(patch: Partial<Settings>) {
 }
 
 async function importFiles() {
-  if (window.stikly) {
-    await window.stikly.importFiles()
+  if (window.stickie) {
+    await window.stickie.importFiles()
   }
 }
 
 async function exportNote(note: NoteIndexItem) {
-  if (window.stikly) {
-    await window.stikly.exportNote(note.id, 'md')
+  if (window.stickie) {
+    await window.stickie.exportNote(note.id, 'md')
   }
 }
 </script>
@@ -144,7 +144,7 @@ async function exportNote(note: NoteIndexItem) {
           S
         </div>
         <div>
-          <h1 class="text-base font-bold tracking-tight">Stikly</h1>
+          <h1 class="text-base font-bold tracking-tight">Stickie</h1>
           <p class="text-[11px] text-stone-500 dark:text-stone-400">{{ t('app.myNotes') }}</p>
         </div>
       </div>

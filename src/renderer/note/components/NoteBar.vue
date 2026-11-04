@@ -45,7 +45,7 @@ function onCustomColor(event: Event) {
   >
     <!-- Left: Drag handle area -->
     <div class="flex-1 h-full flex items-center" style="-webkit-app-region: drag;">
-      <span class="text-[11px] font-medium opacity-50 px-1 select-none">Stikly</span>
+      <span class="text-[11px] font-medium opacity-50 px-1 select-none">Stickie</span>
     </div>
 
     <!-- Right: Interactive Actions -->

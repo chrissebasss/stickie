@@ -46,7 +46,7 @@ export async function saveAssetBuffer(
   const targetPath = join(noteDir, filename)
   await fs.writeFile(targetPath, buffer)
 
-  return `stikly-asset://${noteId}/${filename}`
+  return `stickie-asset://${noteId}/${filename}`
 }
 
 export async function saveAssetFile(
@@ -65,14 +65,14 @@ export async function saveAssetFile(
 }
 
 /**
- * Recursively inspects TipTap document to find all images using stikly-asset://<noteId>/<filename>.
+ * Recursively inspects TipTap document to find all images using stickie-asset://<noteId>/<filename>.
  */
 export function extractReferencedAssetFiles(
   node: JSONContent,
   noteId: string,
   result = new Set<string>()
 ): Set<string> {
-  const prefix = `stikly-asset://${noteId}/`
+  const prefix = `stickie-asset://${noteId}/`
   if (node.type === 'image' && node.attrs && typeof node.attrs.src === 'string') {
     const src = node.attrs.src
     if (src.startsWith(prefix)) {

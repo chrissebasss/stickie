@@ -1,6 +1,6 @@
-# AGENTS.md: Building Stikly (desktop sticky notes app)
+# AGENTS.md: Building Stickie (desktop sticky notes app)
 
-You are building **Stikly**, a cross-platform (Windows + Linux) desktop sticky notes app. Read this whole file before writing code. Work milestone by milestone (see "Milestones"), keep the app runnable after every milestone, and tick off the acceptance checklist at the end as you go.
+You are building **Stickie**, a cross-platform (Windows + Linux) desktop sticky notes app. Read this whole file before writing code. Work milestone by milestone (see "Milestones"), keep the app runnable after every milestone, and tick off the acceptance checklist at the end as you go.
 
 ---
 
@@ -8,7 +8,7 @@ You are building **Stikly**, a cross-platform (Windows + Linux) desktop sticky n
 
 **Electron + Vue 3 + TypeScript**, not Tauri.
 
-Why: Stikly is window-management heavy (many frameless windows, saved bounds, tray, display add/remove handling, native theme, clipboard images). Electron ships one Chromium everywhere, so behavior is identical on Windows and Linux. Tauri uses WebKitGTK on Linux, which has known problems with transparency, frameless windows, clipboard images and tray behavior. Bundle size is not a priority here.
+Why: Stickie is window-management heavy (many frameless windows, saved bounds, tray, display add/remove handling, native theme, clipboard images). Electron ships one Chromium everywhere, so behavior is identical on Windows and Linux. Tauri uses WebKitGTK on Linux, which has known problems with transparency, frameless windows, clipboard images and tray behavior. Bundle size is not a priority here.
 
 | Concern | Choice |
 |---|---|
@@ -31,7 +31,7 @@ Three process layers with strict boundaries:
 
 ```
 main (Node)       -> windows, tray, storage, display handling, theme, protocol, IPC handlers
-preload (bridge)  -> exposes a small typed `window.stikly` API via contextBridge
+preload (bridge)  -> exposes a small typed `window.stickie` API via contextBridge
 renderer (Vue)    -> two entry points: "manager" (My notes panel) and "note" (one sticky note)
 ```
 
@@ -74,7 +74,7 @@ Keep logic that can be pure (contrast math, bounds clamping, title derivation, i
 
 ## 3. Data model and storage
 
-Storage root: `app.getPath('userData')/Stikly/`
+Storage root: `app.getPath('userData')/Stickie/`
 
 ```
 notes/<id>.json
@@ -165,7 +165,7 @@ Text color and highlight each offer a small swatch palette plus a custom color i
 - **Search:** live, case-insensitive, matches title and full plain text, highlights matches in the snippet.
 - **Open:** double-click or button opens the note window (focuses it if already open).
 - **Delete:** with a confirmation dialog (or a 10 s undo toast). Also deletes the note's assets folder.
-- **Import:** file picker supporting `.txt`, `.md`, `.html` (convert to TipTap JSON, sanitizing HTML) and Stikly's own `.json` export. Multiple selection allowed. Each file becomes a new note, the title coming from the first line or the filename.
+- **Import:** file picker supporting `.txt`, `.md`, `.html` (convert to TipTap JSON, sanitizing HTML) and Stickie's own `.json` export. Multiple selection allowed. Each file becomes a new note, the title coming from the first line or the filename.
 - **Export (bonus, cheap to add):** a note as `.json` (with inline images as data URIs) or `.md`.
 - **New note** button, prominent, one click.
 - Also shows a tray-like quick action: "Close all open notes".
@@ -210,7 +210,7 @@ function ensureVisible(bounds: Bounds, workAreas: Rect[], primary: Rect): Bounds
 
 - **Pick from system:** toolbar button calls `dialog.showOpenDialog` in main (filters png, jpg, jpeg, gif, webp, svg). Main copies the file into `assets/<noteId>/<sha1>.<ext>` and returns a URL.
 - **Paste from clipboard:** handle ProseMirror's paste event. If `clipboardData` contains image items, read the bytes, send to main via IPC, store as PNG, insert the image node. Also support drag-and-drop of image files into the note.
-- Images are referenced in the document by a custom protocol URL, e.g. `stikly-asset://<noteId>/<file>`. Register it with `protocol.handle` (and `registerSchemesAsPrivileged` for `secure`, `supportFetchAPI`). Never store base64 images in the note JSON.
+- Images are referenced in the document by a custom protocol URL, e.g. `stickie-asset://<noteId>/<file>`. Register it with `protocol.handle` (and `registerSchemesAsPrivileged` for `secure`, `supportFetchAPI`). Never store base64 images in the note JSON.
 - Limit each image to a sane max (e.g. downscale anything above 4096 px on the long side, reject files above ~25 MB with a friendly message).
 - Images should be resizable inside the note (TipTap's image resize option or a small custom node view) and never overflow the note width by default.
 - Orphan cleanup: on note save, remove asset files no longer referenced by the document; on note delete, remove the asset folder.
@@ -219,7 +219,7 @@ function ensureVisible(bounds: Bounds, workAreas: Rect[], primary: Rect): Bounds
 
 ## 5. Platform notes and gotchas
 
-- **Linux + Wayland:** Wayland does not let apps position their own windows, which breaks "remember position". Default to X11/XWayland on Linux: `app.commandLine.appendSwitch('ozone-platform-hint', 'x11')` or set `ozone-platform=x11` before `app.whenReady()`. Make this a documented, overridable choice (env var `STIKLY_OZONE=wayland`).
+- **Linux + Wayland:** Wayland does not let apps position their own windows, which breaks "remember position". Default to X11/XWayland on Linux: `app.commandLine.appendSwitch('ozone-platform-hint', 'x11')` or set `ozone-platform=x11` before `app.whenReady()`. Make this a documented, overridable choice (env var `STICKIE_OZONE=wayland`).
 - **Linux tray:** needs StatusNotifier/AppIndicator support. KDE works out of the box; GNOME requires the AppIndicator extension. Document in README.
 - **Frameless windows on Windows:** keep native resize borders working. Verify snap layouts and Aero shake do not misbehave. Set `skipTaskbar` for note windows if you want them to share one taskbar entry with the manager; otherwise leave them visible and test alt-tab.
 - **Transparent windows:** avoid `transparent: true` (flaky on Linux). Use a solid colored window background plus CSS rounded corners only if it looks right without transparency.
@@ -252,7 +252,7 @@ Complete in order. After each, the app must launch and not lose data. Commit per
 7. **Colors and theme:** presets, custom picker, contrast helpers with tests, per-note color, light/dark/system theme.
 8. **Images:** file picker, clipboard paste, drag-drop, asset protocol, resize, orphan cleanup.
 9. **Tray + multi-monitor:** tray menu, close all, display-event handling with tests.
-10. **Import/export:** txt, md, html, Stikly json.
+10. **Import/export:** txt, md, html, Stickie json.
 11. **Hardening:** flush-on-exit for every exit path, crash/kill recovery test, Playwright smoke tests, accessibility pass.
 12. **Packaging:** electron-builder configs, GitHub Actions matrix, README (install, build, Wayland and tray notes), app icons.
 

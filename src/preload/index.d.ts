@@ -1,10 +1,10 @@
-import type { StiklyAPI } from '../shared/ipc-contract'
+import type { StickieAPI } from '../shared/ipc-contract'
 
 declare global {
   interface Window {
-    stikly: StiklyAPI
+    stickie: StickieAPI
   }
 }
 
-export {}
+export { }
 

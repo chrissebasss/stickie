@@ -8,7 +8,7 @@ import {
   parseTxtToNote,
   parseMdToNote,
   parseHtmlToNote,
-  parseStiklyJson,
+  parseStickieJson,
   exportNoteToMarkdown,
   exportNoteToJson
 } from '../shared/importExport'
@@ -39,11 +39,11 @@ export async function importFilesFromDisk(noteStore: NoteStore): Promise<string[
       let noteData: Partial<Note> = {}
 
       if (ext === '.json') {
-        const parsed = parseStiklyJson(raw)
+        const parsed = parseStickieJson(raw)
         if (parsed) {
           noteData = parsed
         } else {
-          // If not Stikly JSON, treat as raw text
+          // If not Stickie JSON, treat as raw text
           noteData = parseTxtToNote(raw, fileName)
         }
       } else if (ext === '.md' || ext === '.markdown') {

@@ -13,11 +13,11 @@ export function createManagerWindow(
   const win = new BrowserWindow({
     x: savedBounds?.x,
     y: savedBounds?.y,
-    width: savedBounds?.width || 840,
-    height: savedBounds?.height || 620,
-    minWidth: 500,
+    width: savedBounds?.width || 400,
+    height: savedBounds?.height || 500,
+    minWidth: 400,
     minHeight: 400,
-    title: 'Stikly - My Notes',
+    title: 'Stickie - My Notes',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {

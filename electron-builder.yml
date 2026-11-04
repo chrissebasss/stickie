@@ -1,5 +1,5 @@
-appId: com.stikly.app
-productName: Stikly
+appId: com.stickie.app
+productName: Stickie
 directories:
   output: dist
   buildResources: resources
@@ -25,7 +25,7 @@ nsis:
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true
   createStartMenuShortcut: true
-  shortcutName: Stikly
+  shortcutName: Stickie
 
 linux:
   target:
@@ -38,8 +38,8 @@ linux:
   icon: resources/icons/icon.png
   category: Utility
   desktop:
-    Name: Stikly
+    Name: Stickie
     Comment: Cross-platform desktop sticky notes
-    StartupWMClass: stikly
+    StartupWMClass: stickie
     Categories: Utility;TextEditor;
 

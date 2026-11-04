@@ -12,7 +12,7 @@ describe('SettingsStore', () => {
   let store: SettingsStore
 
   beforeEach(async () => {
-    testDir = await fs.mkdtemp(join(tmpdir(), 'stikly-test-settings-'))
+    testDir = await fs.mkdtemp(join(tmpdir(), 'stickie-test-settings-'))
     store = new SettingsStore(testDir)
   })
 

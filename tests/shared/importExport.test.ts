@@ -3,7 +3,7 @@ import {
   parseTxtToNote,
   parseMdToNote,
   parseHtmlToNote,
-  parseStiklyJson,
+  parseStickieJson,
   exportNoteToMarkdown,
   exportNoteToJson
 } from '@shared/importExport'
@@ -37,7 +37,7 @@ describe('import / export helpers', () => {
     expect(parsed.plainText).not.toContain('alert(1)')
   })
 
-  it('parses valid Stikly JSON export', () => {
+  it('parses valid Stickie JSON export', () => {
     const validJson = JSON.stringify({
       schemaVersion: 1,
       id: 'abc',
@@ -50,7 +50,7 @@ describe('import / export helpers', () => {
       plainText: 'Imported Note'
     })
 
-    const parsed = parseStiklyJson(validJson)
+    const parsed = parseStickieJson(validJson)
     expect(parsed).not.toBeNull()
     expect(parsed?.title).toBe('Imported Note')
   })

@@ -10,7 +10,7 @@ describe('NoteStore', () => {
   let store: NoteStore
 
   beforeEach(async () => {
-    testDir = await fs.mkdtemp(join(tmpdir(), 'stikly-test-notes-'))
+    testDir = await fs.mkdtemp(join(tmpdir(), 'stickie-test-notes-'))
     store = new NoteStore(testDir, { debounceMs: 50 })
     await store.init()
   })

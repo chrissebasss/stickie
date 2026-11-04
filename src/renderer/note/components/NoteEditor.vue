@@ -85,7 +85,7 @@ const editor = useEditor({
     },
     handlePaste(view, event) {
       const items = event.clipboardData?.items
-      if (!items || !props.noteId || !window.stikly) return false
+      if (!items || !props.noteId || !window.stickie) return false
       for (let i = 0; i < items.length; i++) {
         const item = items[i]
         if (item.type.startsWith('image/')) {
@@ -94,7 +94,7 @@ const editor = useEditor({
             event.preventDefault()
             const ext = file.type.split('/')[1] || 'png'
             file.arrayBuffer().then(async (buffer) => {
-              const url = await window.stikly.saveImageBuffer(props.noteId!, buffer, ext)
+              const url = await window.stickie.saveImageBuffer(props.noteId!, buffer, ext)
               if (url && editor.value) {
                 editor.value.chain().focus().setImage({ src: url }).run()
               }
@@ -107,14 +107,14 @@ const editor = useEditor({
     },
     handleDrop(view, event) {
       const files = event.dataTransfer?.files
-      if (!files || files.length === 0 || !props.noteId || !window.stikly) return false
+      if (!files || files.length === 0 || !props.noteId || !window.stickie) return false
       for (let i = 0; i < files.length; i++) {
         const file = files[i]
         if (file.type.startsWith('image/')) {
           event.preventDefault()
           const ext = file.type.split('/')[1] || 'png'
           file.arrayBuffer().then(async (buffer) => {
-            const url = await window.stikly.saveImageBuffer(props.noteId!, buffer, ext)
+            const url = await window.stickie.saveImageBuffer(props.noteId!, buffer, ext)
             if (url && editor.value) {
               editor.value.chain().focus().setImage({ src: url }).run()
             }
