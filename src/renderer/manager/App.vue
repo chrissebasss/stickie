@@ -1,15 +1,21 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Plus, XCircle, Settings as SettingsIcon, StickyNote, ArrowUpDown, Upload } from 'lucide-vue-next'
+import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload } from 'lucide-vue-next'
 import SearchBar from './components/SearchBar.vue'
 import NoteCard from './components/NoteCard.vue'
 import DeleteConfirmModal from './components/DeleteConfirmModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
+import CustomSelect from './components/CustomSelect.vue'
 import type { NoteIndexItem, Settings } from '../../shared/types'
 
 const notes = ref<NoteIndexItem[]>([])
 const searchQuery = ref('')
 const sortOrder = ref<'newest' | 'oldest' | 'title'>('newest')
+const sortOptions: { value: 'newest' | 'oldest' | 'title'; label: string }[] = [
+  { value: 'newest', label: 'Newest first' },
+  { value: 'oldest', label: 'Oldest first' },
+  { value: 'title', label: 'Title (A-Z)' }
+]
 const isDark = ref(false)
 const showSettings = ref(false)
 const noteToDelete = ref<NoteIndexItem | null>(null)
@@ -173,16 +179,8 @@ async function exportNote(note: NoteIndexItem) {
         <SearchBar v-model="searchQuery" />
       </div>
 
-      <div class="flex items-center space-x-2 text-xs text-stone-500 dark:text-stone-400">
-        <ArrowUpDown class="w-3.5 h-3.5" />
-        <select
-          v-model="sortOrder"
-          class="bg-transparent border border-stone-200 dark:border-stone-700 rounded-md px-2 py-1 text-xs text-stone-700 dark:text-stone-300 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        >
-          <option value="newest">Newest first</option>
-          <option value="oldest">Oldest first</option>
-          <option value="title">Title (A-Z)</option>
-        </select>
+      <div>
+        <CustomSelect v-model="sortOrder" :options="sortOptions" />
       </div>
     </div>
 
