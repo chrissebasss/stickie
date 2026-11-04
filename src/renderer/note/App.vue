@@ -108,6 +108,8 @@ onMounted(() => {
       :note-id="note.id"
       :always-on-top="note.alwaysOnTop ?? false"
       :color="note.color"
+      :show-toolbar="showToolbar"
+      @toggle-toolbar="showToolbar = !showToolbar"
       @toggle-pin="togglePin"
       @update-color="updateColor"
       @close="closeNote"

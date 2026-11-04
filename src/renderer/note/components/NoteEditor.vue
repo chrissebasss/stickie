@@ -14,7 +14,7 @@ import TableHeader from '@tiptap/extension-table-header'
 import TableCell from '@tiptap/extension-table-cell'
 import Image from '@tiptap/extension-image'
 import Placeholder from '@tiptap/extension-placeholder'
-import type { JSONContent } from '@tiptap/vue-3'
+import { Extension, type JSONContent } from '@tiptap/vue-3'
 
 const props = defineProps<{
   initialContent?: JSONContent
@@ -23,7 +23,21 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   (e: 'update', payload: { content: JSONContent; plainText: string }): void
+  (e: 'toggleToolbar'): void
 }>()
+
+const CustomShortcuts = Extension.create({
+  name: 'customShortcuts',
+  addKeyboardShortcuts() {
+    return {
+      'Mod-Shift-x': () => this.editor.commands.toggleStrike(),
+      'Mod-Shift-X': () => this.editor.commands.toggleStrike(),
+      'Mod-Shift-7': () => this.editor.commands.toggleOrderedList(),
+      'Mod-Shift-8': () => this.editor.commands.toggleBulletList(),
+      'Mod-Shift-9': () => this.editor.commands.toggleTaskList()
+    }
+  }
+})
 
 const editor = useEditor({
   content: props.initialContent || { type: 'doc', content: [{ type: 'paragraph' }] },
@@ -52,7 +66,8 @@ const editor = useEditor({
     }),
     Placeholder.configure({
       placeholder: 'Take a note...'
-    })
+    }),
+    CustomShortcuts
   ],
   onUpdate: ({ editor }) => {
     emit('update', {

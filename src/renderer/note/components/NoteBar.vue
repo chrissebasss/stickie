@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Plus, Pin, PinOff, Palette, X } from 'lucide-vue-next'
+import { Plus, Pin, PinOff, Palette, X, SlidersHorizontal } from 'lucide-vue-next'
 import type { NoteColor, PresetColorId } from '../../../shared/types'
 
 const props = defineProps<{
   noteId: string
   alwaysOnTop: boolean
   color: NoteColor
+  showToolbar?: boolean
 }>()
 
 const emit = defineEmits<{
   (e: 'togglePin'): void
+  (e: 'toggleToolbar'): void
   (e: 'updateColor', color: NoteColor): void
   (e: 'close'): void
   (e: 'newNote'): void
@@ -99,6 +101,17 @@ function onCustomColor(event: Event) {
           </label>
         </div>
       </div>
+
+      <!-- Toggle toolbar -->
+      <button
+        class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
+        :class="{ 'opacity-60': !showToolbar }"
+        aria-label="Toggle formatting toolbar"
+        title="Toggle formatting toolbar"
+        @click="emit('toggleToolbar')"
+      >
+        <SlidersHorizontal class="w-3.5 h-3.5" />
+      </button>
 
       <!-- Pin / Always on top -->
       <button
