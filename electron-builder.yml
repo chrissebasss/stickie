@@ -1,0 +1,44 @@
+appId: com.stikly.app
+productName: Stikly
+directories:
+  output: dist
+  buildResources: resources
+
+files:
+  - out/**/*
+  - resources/icons/**/*
+  - package.json
+
+extraResources:
+  - from: resources/icons
+    to: icons
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+  icon: resources/icons/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: Stikly
+
+linux:
+  target:
+    - target: AppImage
+      arch:
+        - x64
+    - target: deb
+      arch:
+        - x64
+  icon: resources/icons/icon.png
+  category: Utility
+  desktop:
+    Name: Stikly
+    Comment: Cross-platform desktop sticky notes
+    StartupWMClass: stikly
+    Categories: Utility;TextEditor;
