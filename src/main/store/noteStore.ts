@@ -3,13 +3,14 @@ import { join } from 'path'
 import type { Note, NoteIndexItem } from '../../shared/types'
 import { deriveTitle, isNoteEmpty } from '../../shared/title'
 import { writeAtomic, readJsonWithBackup, removeFileAndBackup } from './atomicFile'
+import { extractReferencedAssetFiles, cleanOrphanAssets } from './assets'
 
 export interface NoteStoreOptions {
   debounceMs?: number
 }
 
 export class NoteStore {
-  private baseDir: string
+  public readonly baseDir: string
   private debounceMs: number
   private index: Map<string, NoteIndexItem> = new Map()
   private pendingSaves: Map<string, { note: Note; timer: NodeJS.Timeout }> = new Map()
@@ -223,5 +224,13 @@ export class NoteStore {
     const notePath = this.getNotePath(note.id)
     const data = JSON.stringify(note, null, 2)
     await writeAtomic(notePath, data)
+
+    // Orphan cleanup for assets
+    if (note.content) {
+      const referenced = extractReferencedAssetFiles(note.content, note.id)
+      cleanOrphanAssets(this.baseDir, note.id, referenced).catch((err) => {
+        console.warn(`[NoteStore] Error cleaning orphan assets for ${note.id}:`, err)
+      })
+    }
   }
 }

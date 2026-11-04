@@ -17,6 +17,7 @@ import Placeholder from '@tiptap/extension-placeholder'
 import { Extension, type JSONContent } from '@tiptap/vue-3'
 
 const props = defineProps<{
+  noteId?: string
   initialContent?: JSONContent
   editable?: boolean
 }>()
@@ -69,6 +70,49 @@ const editor = useEditor({
     }),
     CustomShortcuts
   ],
+  editorProps: {
+    handlePaste(view, event) {
+      const items = event.clipboardData?.items
+      if (!items || !props.noteId || !window.stikly) return false
+      for (let i = 0; i < items.length; i++) {
+        const item = items[i]
+        if (item.type.startsWith('image/')) {
+          const file = item.getAsFile()
+          if (file) {
+            event.preventDefault()
+            const ext = file.type.split('/')[1] || 'png'
+            file.arrayBuffer().then(async (buffer) => {
+              const url = await window.stikly.saveImageBuffer(props.noteId!, buffer, ext)
+              if (url && editor.value) {
+                editor.value.chain().focus().setImage({ src: url }).run()
+              }
+            })
+            return true
+          }
+        }
+      }
+      return false
+    },
+    handleDrop(view, event) {
+      const files = event.dataTransfer?.files
+      if (!files || files.length === 0 || !props.noteId || !window.stikly) return false
+      for (let i = 0; i < files.length; i++) {
+        const file = files[i]
+        if (file.type.startsWith('image/')) {
+          event.preventDefault()
+          const ext = file.type.split('/')[1] || 'png'
+          file.arrayBuffer().then(async (buffer) => {
+            const url = await window.stikly.saveImageBuffer(props.noteId!, buffer, ext)
+            if (url && editor.value) {
+              editor.value.chain().focus().setImage({ src: url }).run()
+            }
+          })
+          return true
+        }
+      }
+      return false
+    }
+  },
   onUpdate: ({ editor }) => {
     emit('update', {
       content: editor.getJSON(),

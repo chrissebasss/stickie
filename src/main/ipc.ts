@@ -1,4 +1,4 @@
-import { ipcMain, nativeTheme, BrowserWindow } from 'electron'
+import { ipcMain, nativeTheme, BrowserWindow, dialog, net } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { IPC_CHANNELS } from '../shared/ipc-contract'
 import type {
@@ -12,6 +12,7 @@ import type {
 import type { NoteStore } from './store/noteStore'
 import type { SettingsStore } from './store/settingsStore'
 import type { WindowManager } from './windows/windowManager'
+import { saveAssetFile, saveAssetBuffer } from './store/assets'
 
 export function registerIpcHandlers(
   noteStore: NoteStore,
@@ -166,6 +167,43 @@ export function registerIpcHandlers(
         mode: settings.theme,
         resolved: nativeTheme.shouldUseDarkColors ? 'dark' : 'light'
       }
+    }
+  )
+
+  // 14. Asset: Pick Image
+  ipcMain.handle(
+    IPC_CHANNELS.ASSET_PICK_IMAGE,
+    async (_, noteId: string): Promise<string | null> => {
+      if (!noteId) return null
+      const result = await dialog.showOpenDialog({
+        title: 'Select Image',
+        properties: ['openFile'],
+        filters: [
+          { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'svg'] }
+        ]
+      })
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return null
+      }
+
+      const sourcePath = result.filePaths[0]
+      return saveAssetFile(noteStore.baseDir, noteId, sourcePath)
+    }
+  )
+
+  // 15. Asset: Save Buffer
+  ipcMain.handle(
+    IPC_CHANNELS.ASSET_SAVE_BUFFER,
+    async (
+      _,
+      noteId: string,
+      buffer: ArrayBuffer,
+      ext: string
+    ): Promise<string | null> => {
+      if (!noteId || !buffer) return null
+      const nodeBuf = Buffer.from(buffer)
+      return saveAssetBuffer(noteStore.baseDir, noteId, nodeBuf, ext)
     }
   )
 

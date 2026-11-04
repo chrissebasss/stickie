@@ -1,11 +1,26 @@
-import { app, BrowserWindow } from 'electron'
+import { app, BrowserWindow, protocol, net } from 'electron'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { NoteStore } from './store/noteStore'
 import { SettingsStore } from './store/settingsStore'
 import { WindowManager } from './windows/windowManager'
 import { createManagerWindow } from './windows/managerWindow'
 import { registerIpcHandlers, applyTheme } from './ipc'
 import { setupDisplayListeners } from './displays'
+import { getAssetDiskPath } from './store/assets'
+
+// Register custom protocol scheme as privileged before app is ready
+protocol.registerSchemesAsPrivileged([
+  {
+    scheme: 'stikly-asset',
+    privileges: {
+      secure: true,
+      standard: true,
+      supportFetchAPI: true,
+      corsEnabled: true
+    }
+  }
+])
 
 // Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
 if (process.platform === 'linux') {
@@ -27,6 +42,22 @@ const windowManager = new WindowManager(noteStore, settingsStore)
 let isQuitting = false
 
 app.whenReady().then(async () => {
+  protocol.handle('stikly-asset', async (request) => {
+    try {
+      const url = new URL(request.url)
+      const noteId = url.host
+      const filename = url.pathname.replace(/^\//, '')
+      const diskPath = getAssetDiskPath(noteStore.baseDir, noteId, filename)
+      if (!diskPath) {
+        return new Response('Not found', { status: 404 })
+      }
+      return net.fetch(pathToFileURL(diskPath).toString())
+    } catch (err) {
+      console.error('[Protocol] Error handling stikly-asset:', err)
+      return new Response('Internal error', { status: 500 })
+    }
+  })
+
   await noteStore.init()
   const settings = await settingsStore.load()
   applyTheme(settings.theme)

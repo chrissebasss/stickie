@@ -128,6 +128,7 @@ onMounted(() => {
       <NoteEditor
         v-if="note"
         ref="editorComponent"
+        :note-id="note.id"
         :initial-content="note.content"
         @update="onEditorUpdate"
       />
