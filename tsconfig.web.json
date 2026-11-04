@@ -1,0 +1,31 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "tsBuildInfoFile": "./node_modules/.tmp/tsconfig.web.tsbuildinfo",
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "module": "ESNext",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "skipLibCheck": true,
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": false,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "moduleDetection": "force",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    "paths": {
+      "@renderer/*": ["./src/renderer/*"],
+      "@shared/*": ["./src/shared/*"]
+    }
+  },
+  "include": [
+    "src/renderer/**/*",
+    "src/renderer/**/*.vue",
+    "src/preload/index.d.ts",
+    "src/shared/**/*"
+  ]
+}
