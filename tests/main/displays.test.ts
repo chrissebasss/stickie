@@ -53,4 +53,30 @@ describe('displays - ensureVisible', () => {
     const result = ensureVisible(edgeBounds, [primaryDisplay], primaryDisplay)
     expect(result.x).toBeGreaterThanOrEqual(primaryDisplay.x)
   })
+
+  it('keeps exact position on middle monitor in a 3-monitor setup', () => {
+    // 3 monitors: left (-1920..0), middle/primary (0..1920), right (1920..3840)
+    const workAreas = [leftSecondaryDisplay, primaryDisplay, secondaryDisplay]
+    const middleBounds: Bounds = { x: 500, y: 300, width: 320, height: 360 }
+    const result = ensureVisible(middleBounds, workAreas, primaryDisplay)
+    expect(result).toEqual(middleBounds)
+  })
+
+  it('keeps exact position on right monitor in a 3-monitor setup', () => {
+    const workAreas = [leftSecondaryDisplay, primaryDisplay, secondaryDisplay]
+    const rightBounds: Bounds = { x: 2200, y: 250, width: 320, height: 360 }
+    const result = ensureVisible(rightBounds, workAreas, primaryDisplay)
+    expect(result).toEqual(rightBounds)
+  })
+
+  it('nudges slightly off-top window down so the drag bar is reachable without relocating', () => {
+    const workAreas = [primaryDisplay]
+    // Top bar is at y: -10, so part of the bar is above screen
+    const offTopBounds: Bounds = { x: 200, y: -10, width: 320, height: 360 }
+    const result = ensureVisible(offTopBounds, workAreas, primaryDisplay)
+    expect(result.y).toBe(0) // nudged to workArea.y
+    expect(result.x).toBe(200)
+    expect(result.width).toBe(320)
+    expect(result.height).toBe(360)
+  })
 })

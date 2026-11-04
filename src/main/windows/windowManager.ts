@@ -77,27 +77,45 @@ export class WindowManager {
       win.focus()
     })
 
-    // Debounced bounds saving on move and resize
+    // Bounds saving on move and resize (debounced during drag, immediate on release)
+    const saveBoundsNow = async () => {
+      if (win.isDestroyed()) return
+      const currentBounds = win.getNormalBounds()
+      const currentNote = await this.noteStore.getNote(noteId)
+      if (currentNote) {
+        currentNote.bounds = currentBounds
+        this.noteStore.queueSave(currentNote)
+      }
+    }
+
     let boundsDebounce: NodeJS.Timeout | null = null
-    const saveBounds = () => {
+    const debouncedSaveBounds = () => {
       if (boundsDebounce) clearTimeout(boundsDebounce)
-      boundsDebounce = setTimeout(async () => {
-        if (!win.isDestroyed()) {
+      boundsDebounce = setTimeout(saveBoundsNow, 150)
+    }
+
+    win.on('move', debouncedSaveBounds)
+    win.on('moved', saveBoundsNow)
+    win.on('resize', debouncedSaveBounds)
+    win.on('resized', saveBoundsNow)
+
+    win.on('close', async () => {
+      if (boundsDebounce) {
+        clearTimeout(boundsDebounce)
+        boundsDebounce = null
+      }
+      if (!win.isDestroyed()) {
+        try {
           const currentBounds = win.getNormalBounds()
           const currentNote = await this.noteStore.getNote(noteId)
           if (currentNote) {
             currentNote.bounds = currentBounds
-            this.noteStore.queueSave(currentNote)
+            await this.noteStore.saveNoteNow(currentNote)
           }
+        } catch {
+          // ignore
         }
-      }, 400)
-    }
-
-    win.on('move', saveBounds)
-    win.on('resize', saveBounds)
-
-    win.on('close', async () => {
-      if (boundsDebounce) clearTimeout(boundsDebounce)
+      }
       await this.noteStore.flush()
     })
 
@@ -139,16 +157,37 @@ export class WindowManager {
   public async closeNote(noteId: string): Promise<void> {
     const win = this.noteWindows.get(noteId)
     if (win && !win.isDestroyed()) {
+      try {
+        const currentBounds = win.getNormalBounds()
+        const currentNote = await this.noteStore.getNote(noteId)
+        if (currentNote) {
+          currentNote.bounds = currentBounds
+          await this.noteStore.saveNoteNow(currentNote)
+        }
+      } catch {
+        // ignore
+      }
       win.close()
     }
   }
 
-  public closeAllNotes(): void {
-    for (const [, win] of this.noteWindows) {
+  public async closeAllNotes(): Promise<void> {
+    for (const [noteId, win] of this.noteWindows) {
       if (!win.isDestroyed()) {
+        try {
+          const currentBounds = win.getNormalBounds()
+          const currentNote = await this.noteStore.getNote(noteId)
+          if (currentNote) {
+            currentNote.bounds = currentBounds
+            await this.noteStore.saveNoteNow(currentNote)
+          }
+        } catch {
+          // ignore
+        }
         win.close()
       }
     }
+    await this.noteStore.flush()
   }
 
   public setNoteAlwaysOnTop(noteId: string, alwaysOnTop: boolean): void {
@@ -162,17 +201,23 @@ export class WindowManager {
     const baseWidth = 320
     const baseHeight = 360
 
-    // Detect where the user currently is:
-    // Priority 1: If manager window is focused/visible, place note on the manager window's display
+    // Detect target monitor:
+    // Priority 1: If manager window is open/visible, place note on the manager window's display
     // Priority 2: Display nearest the cursor position
-    let workArea = screen.getDisplayNearestPoint(screen.getCursorScreenPoint()).workArea
+    let workArea: Electron.Rectangle | null = null
 
     const managerWin = this.managerWindow
     if (managerWin && !managerWin.isDestroyed() && managerWin.isVisible()) {
-      if (managerWin.isFocused()) {
-        const display = screen.getDisplayMatching(managerWin.getBounds())
+      const display = screen.getDisplayMatching(managerWin.getBounds())
+      if (display && display.workArea) {
         workArea = display.workArea
       }
+    }
+
+    if (!workArea) {
+      const cursorPoint = screen.getCursorScreenPoint()
+      const display = screen.getDisplayNearestPoint(cursorPoint)
+      workArea = display ? display.workArea : screen.getPrimaryDisplay().workArea
     }
 
     const offset = (this.lastCascadeOffset % 8) * 30

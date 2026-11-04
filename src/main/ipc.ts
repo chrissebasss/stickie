@@ -29,6 +29,15 @@ export function registerIpcHandlers(
   // 2. Note: Save
   ipcMain.handle(IPC_CHANNELS.NOTE_SAVE, async (_, note: Note): Promise<void> => {
     if (!note || !note.id) return
+    const win = windowManager.getOpenNoteWindow(note.id)
+    if (win && !win.isDestroyed()) {
+      note.bounds = win.getNormalBounds()
+    } else {
+      const existing = await noteStore.getNote(note.id)
+      if (existing) {
+        note.bounds = existing.bounds
+      }
+    }
     noteStore.queueSave(note)
   })
 
@@ -37,8 +46,17 @@ export function registerIpcHandlers(
     IPC_CHANNELS.NOTE_CLOSE,
     async (_, noteId: string, currentNote?: Note): Promise<void> => {
       if (!noteId) return
-      const noteToSave = currentNote || (await noteStore.getNote(noteId))
+      const win = windowManager.getOpenNoteWindow(noteId)
+      let noteToSave = currentNote || (await noteStore.getNote(noteId))
       if (noteToSave) {
+        if (win && !win.isDestroyed()) {
+          noteToSave.bounds = win.getNormalBounds()
+        } else {
+          const existing = await noteStore.getNote(noteId)
+          if (existing) {
+            noteToSave.bounds = existing.bounds
+          }
+        }
         await noteStore.discardIfEmpty(noteToSave)
       }
       await windowManager.closeNote(noteId)
