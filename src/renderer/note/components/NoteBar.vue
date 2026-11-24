@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, Pin, PinOff, Palette, X, SlidersHorizontal } from 'lucide-vue-next'
 import type { NoteColor, PresetColorId } from '../../../shared/types'
+import stickieIcon from '../../assets/icon.png'
 
 const props = defineProps<{
   noteId: string
@@ -44,8 +45,9 @@ function onCustomColor(event: Event) {
     style="-webkit-app-region: drag;"
   >
     <!-- Left: Drag handle area -->
-    <div class="flex-1 h-full flex items-center" style="-webkit-app-region: drag;">
-      <span class="text-[11px] font-medium opacity-50 px-1 select-none">Stickie</span>
+    <div class="flex-1 h-full flex items-center space-x-1" style="-webkit-app-region: drag;">
+      <img :src="stickieIcon" alt="" class="w-3.5 h-3.5 object-contain select-none pointer-events-none opacity-80" />
+      <span class="text-[11px] font-medium opacity-60 select-none">Stickie</span>
     </div>
 
     <!-- Right: Interactive Actions -->

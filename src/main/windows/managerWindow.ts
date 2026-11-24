@@ -1,6 +1,7 @@
 import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import type { SettingsStore } from '../store/settingsStore'
+import { getAppIconPath } from '../icon'
 
 export function createManagerWindow(
   settingsStore: SettingsStore,
@@ -11,6 +12,7 @@ export function createManagerWindow(
   const savedBounds = cachedSettings.managerBounds
 
   const win = new BrowserWindow({
+    icon: getAppIconPath(),
     x: savedBounds?.x,
     y: savedBounds?.y,
     width: savedBounds?.width || 400,

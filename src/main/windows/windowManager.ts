@@ -4,6 +4,7 @@ import type { Note, Bounds } from '../../shared/types'
 import type { NoteStore } from '../store/noteStore'
 import type { SettingsStore } from '../store/settingsStore'
 import { ensureVisible, getDisplayTopology } from '../displays'
+import { getAppIconPath } from '../icon'
 
 export class WindowManager {
   private noteWindows: Map<string, BrowserWindow> = new Map()
@@ -50,6 +51,7 @@ export class WindowManager {
     const bounds = ensureVisible(rawBounds, workAreas, primary, this.lastCascadeOffset)
 
     const win = new BrowserWindow({
+      icon: getAppIconPath(),
       x: bounds.x,
       y: bounds.y,
       width: Math.max(220, bounds.width),

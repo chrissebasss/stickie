@@ -1,5 +1,6 @@
 import { Tray, Menu, nativeImage, app } from 'electron'
 import { join } from 'path'
+import { getTrayIconPath } from './icon'
 
 export interface TrayCallbacks {
   onNewNote: () => void
@@ -12,7 +13,7 @@ let trayInstance: Tray | null = null
 
 export function setupTray(callbacks: TrayCallbacks): Tray | null {
   try {
-    const iconPath = join(__dirname, '../../resources/icons/tray-24.png')
+    const iconPath = getTrayIconPath('tray-24.png')
     const icon = nativeImage.createFromPath(iconPath)
 
     trayInstance = new Tray(icon)

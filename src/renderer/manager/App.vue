@@ -9,6 +9,7 @@ import SettingsModal from './components/SettingsModal.vue'
 import CustomSelect from './components/CustomSelect.vue'
 import { setAppLanguage } from '../i18n'
 import type { NoteIndexItem, Settings } from '../../shared/types'
+import stickieIcon from '../assets/icon.png'
 
 const { t } = useI18n()
 
@@ -140,9 +141,11 @@ async function exportNote(note: NoteIndexItem) {
     <!-- Top App Header -->
     <header class="px-6 py-4 bg-white dark:bg-stone-800/80 border-b border-stone-200 dark:border-stone-700/80 flex items-center justify-between shadow-sm">
       <div class="flex items-center space-x-2.5">
-        <div class="w-8 h-8 rounded-lg bg-yellow-400 dark:bg-yellow-500 shadow-sm flex items-center justify-center font-bold text-stone-900">
-          S
-        </div>
+        <img
+          :src="stickieIcon"
+          alt="Stickie"
+          class="w-8 h-8 object-contain drop-shadow-sm select-none"
+        />
         <div>
           <h1 class="text-base font-bold tracking-tight">Stickie</h1>
           <p class="text-[11px] text-stone-500 dark:text-stone-400">{{ t('app.myNotes') }}</p>

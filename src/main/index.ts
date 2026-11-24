@@ -24,6 +24,12 @@ protocol.registerSchemesAsPrivileged([
   }
 ])
 
+// Set application identity for proper window manager (WM_CLASS) & taskbar matching
+app.setName('stickie')
+if (process.platform === 'win32') {
+  app.setAppUserModelId('com.stickie.app')
+}
+
 // Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
 if (process.platform === 'linux') {
   const ozonePlatform = process.env.STICKIE_OZONE || 'x11'
