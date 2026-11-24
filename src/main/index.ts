@@ -147,6 +147,7 @@ app.whenReady().then(async () => {
   setupTray({
     onNewNote: async () => {
       const id = uuidv4()
+      const newBounds = windowManager.calculateNewNoteBounds(null)
       const newNote = {
         schemaVersion: 1 as const,
         id,
@@ -154,13 +155,13 @@ app.whenReady().then(async () => {
         createdAt: Date.now(),
         updatedAt: Date.now(),
         color: { kind: 'preset' as const, id: 'yellow' as const },
-        bounds: windowManager.getNextCascadeBounds(),
+        bounds: newBounds,
         content: { type: 'doc', content: [{ type: 'paragraph' }] },
         plainText: '',
         alwaysOnTop: false
       }
       await noteStore.saveNoteNow(newNote)
-      await windowManager.openNote(newNote.id)
+      await windowManager.openNote(newNote.id, newBounds)
     },
     onShowManager: showManager,
     onCloseAllNotes: async () => {

@@ -3,7 +3,7 @@ import type { WindowManager } from './windows/windowManager'
 import type { NoteStore } from './store/noteStore'
 import { ensureVisible, type Rect } from '../shared/displays'
 
-export { ensureVisible, type Rect } from '../shared/displays'
+export { ensureVisible, calculateSpawnBounds, type Rect, type SpawnAnchor } from '../shared/displays'
 
 /**
  * Electron glue: gathers work areas from electron.screen in DIPs.

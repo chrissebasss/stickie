@@ -67,11 +67,12 @@ export function registerIpcHandlers(
   ipcMain.handle(
     IPC_CHANNELS.NOTE_CREATE,
     async (
-      _,
+      event,
       options?: { plainText?: string; color?: NoteColor }
     ): Promise<Note> => {
       const now = Date.now()
-      const cascadeBounds = windowManager.getNextCascadeBounds()
+      const senderWin = BrowserWindow.fromWebContents(event.sender)
+      const newBounds = windowManager.calculateNewNoteBounds(senderWin)
       const newNote: Note = {
         schemaVersion: 1,
         id: uuidv4(),
@@ -79,7 +80,7 @@ export function registerIpcHandlers(
         createdAt: now,
         updatedAt: now,
         color: options?.color || { kind: 'preset', id: 'yellow' },
-        bounds: cascadeBounds,
+        bounds: newBounds,
         content: {
           type: 'doc',
           content: [
@@ -96,7 +97,7 @@ export function registerIpcHandlers(
       }
 
       await noteStore.saveNoteNow(newNote)
-      await windowManager.openNote(newNote.id)
+      await windowManager.openNote(newNote.id, newBounds)
       return newNote
     }
   )

@@ -3,7 +3,7 @@ import { join } from 'path'
 import type { Note, Bounds } from '../../shared/types'
 import type { NoteStore } from '../store/noteStore'
 import type { SettingsStore } from '../store/settingsStore'
-import { ensureVisible, getDisplayTopology } from '../displays'
+import { ensureVisible, getDisplayTopology, calculateSpawnBounds, type SpawnAnchor } from '../displays'
 import { getAppIconPath } from '../icon'
 
 export class WindowManager {
@@ -199,38 +199,49 @@ export class WindowManager {
     }
   }
 
-  public getNextCascadeBounds(): Bounds {
+  public calculateNewNoteBounds(sourceWin?: BrowserWindow | null): Bounds {
     const baseWidth = 320
     const baseHeight = 360
+    const gap = 12
 
-    // Detect target monitor:
-    // Priority 1: If manager window is open/visible, place note on the manager window's display
-    // Priority 2: Display nearest the cursor position
-    let workArea: Electron.Rectangle | null = null
+    let anchor: SpawnAnchor | null = null
+    let targetDisplay: Electron.Display | null = null
 
-    const managerWin = this.managerWindow
-    if (managerWin && !managerWin.isDestroyed() && managerWin.isVisible()) {
-      const display = screen.getDisplayMatching(managerWin.getBounds())
-      if (display && display.workArea) {
-        workArea = display.workArea
+    if (sourceWin && !sourceWin.isDestroyed()) {
+      const bounds = sourceWin.getNormalBounds()
+      targetDisplay = screen.getDisplayMatching(bounds)
+      if (sourceWin === this.managerWindow) {
+        anchor = { type: 'manager', bounds }
+      } else {
+        anchor = { type: 'note', bounds }
       }
+    } else if (this.managerWindow && !this.managerWindow.isDestroyed() && this.managerWindow.isVisible()) {
+      const bounds = this.managerWindow.getNormalBounds()
+      targetDisplay = screen.getDisplayMatching(bounds)
+      anchor = { type: 'manager', bounds }
     }
 
-    if (!workArea) {
+    if (!targetDisplay) {
       const cursorPoint = screen.getCursorScreenPoint()
-      const display = screen.getDisplayNearestPoint(cursorPoint)
-      workArea = display ? display.workArea : screen.getPrimaryDisplay().workArea
+      targetDisplay = screen.getDisplayNearestPoint(cursorPoint) || screen.getPrimaryDisplay()
     }
 
-    const offset = (this.lastCascadeOffset % 8) * 30
-    this.lastCascadeOffset++
+    const workArea = targetDisplay.workArea
+    const openNotes = Array.from(this.noteWindows.values())
+      .filter((w) => !w.isDestroyed() && w !== sourceWin)
+      .map((w) => w.getNormalBounds())
 
-    return {
-      x: workArea.x + 80 + offset,
-      y: workArea.y + 80 + offset,
-      width: baseWidth,
-      height: baseHeight
-    }
+    return calculateSpawnBounds(
+      anchor,
+      workArea,
+      openNotes,
+      { width: baseWidth, height: baseHeight },
+      gap
+    )
+  }
+
+  public getNextCascadeBounds(): Bounds {
+    return this.calculateNewNoteBounds(null)
   }
 
   private syncOpenNoteIdsToSettings(): void {
