@@ -11,6 +11,8 @@ const props = defineProps<{
   modelValue: T
   options: SelectOption<T>[]
   icon?: boolean
+  fullWidth?: boolean
+  ariaLabel?: string
 }>()
 
 const emit = defineEmits<{
@@ -62,26 +64,32 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div ref="dropdownRef" class="relative inline-block text-left select-none">
+  <div
+    ref="dropdownRef"
+    :class="fullWidth ? 'relative block w-full select-none' : 'relative inline-block text-left select-none'"
+  >
     <button
       type="button"
-      class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs text-stone-800 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
+      class="flex items-center space-x-1.5 px-2.5 py-2 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs text-stone-800 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 shadow-sm transition-colors"
+      :class="fullWidth ? 'w-full justify-between' : ''"
       :aria-expanded="isOpen"
+      :aria-label="ariaLabel"
       aria-haspopup="listbox"
       @click="toggle"
     >
-      <ArrowUpDown v-if="icon !== false" class="w-3.5 h-3.5 text-stone-600 dark:text-stone-400 shrink-0" />
-      <span class="font-medium truncate">{{ currentLabel }}</span>
+      <ArrowUpDown v-if="icon !== false" class="w-3.5 h-3.5 text-stone-600 dark:text-stone-400 shrink-0" aria-hidden="true" />
+      <span class="font-medium truncate min-w-0 flex-1 text-left">{{ currentLabel }}</span>
       <ChevronDown
         class="w-3 h-3 text-stone-600 dark:text-stone-400 transition-transform duration-150 shrink-0"
+        aria-hidden="true"
         :class="{ 'rotate-180': isOpen }"
       />
     </button>
 
-    <!-- Custom Popover Menu -->
     <div
       v-if="isOpen"
-      class="absolute right-0 top-full mt-1.5 min-w-[180px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 shadow-xl py-1 z-50 overflow-hidden"
+      class="absolute top-full mt-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 shadow-xl py-1 z-50 overflow-hidden max-h-60 overflow-y-auto"
+      :class="fullWidth ? 'left-0 right-0' : 'right-0 min-w-[180px]'"
       role="listbox"
     >
       <button
@@ -102,6 +110,7 @@ onBeforeUnmount(() => {
         <Check
           v-if="opt.value === modelValue"
           class="w-3.5 h-3.5 ml-2 text-blue-600 dark:text-blue-400 shrink-0"
+          aria-hidden="true"
         />
       </button>
     </div>

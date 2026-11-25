@@ -30,6 +30,7 @@ Apply these skills automatically without waiting for the user to invoke them:
 - **`security-audit`**: Use when triaging `pnpm audit` advisories or reviewing trust boundaries.
 - **`humanizer`**: Use whenever writing or updating documentation (`README.md`, `AGENTS.md`).
 - **Verification:** The agent runs typecheck, tests, build and syntax checks itself and reports the results. Do not ask the user to run commands the agent can run; only ask for checks that need a live GUI, another machine, or an external side effect.
+- **UI components:** Never use browser-native dialogs, alerts, prompts, selects or dropdowns. Use the project's Vue components, such as `CustomSelect` and the app's modals, so styling, keyboard handling and dark mode stay consistent.
 
 ## Documentation Maintenance
 

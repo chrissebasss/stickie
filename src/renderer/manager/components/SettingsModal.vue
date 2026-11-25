@@ -5,6 +5,7 @@ import { X, Sun, Moon, Laptop, Type, RefreshCw } from 'lucide-vue-next'
 import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../shared/types'
 import type { UpdateCheckResult } from '../../../shared/version'
 import { clampProgress } from '../../../shared/updateInfo'
+import CustomSelect, { type SelectOption } from './CustomSelect.vue'
 
 const props = defineProps<{
   settings: Settings
@@ -17,7 +18,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
-const languageOptions = computed<{ value: LanguageMode; label: string }[]>(() => [
+const languageOptions = computed<SelectOption<LanguageMode>[]>(() => [
   { value: 'system', label: t('settings.langSystem') },
   { value: 'en', label: t('settings.langEn') },
   { value: 'nb', label: t('settings.langNb') }
@@ -176,17 +177,14 @@ function toggleLogin(event: Event) {
 
       <!-- Language Switcher -->
       <div class="space-y-1.5">
-        <label for="language-select" class="block text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.language') }}</label>
-        <select
-          id="language-select"
-          :value="settings.language || 'system'"
-          class="w-full rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 px-2.5 py-2 text-xs text-stone-800 dark:text-stone-200 focus-visible:ring-2 focus-visible:ring-blue-500"
-          @change="setLanguage(($event.target as HTMLSelectElement).value as LanguageMode)"
-        >
-          <option v-for="option in languageOptions" :key="option.value" :value="option.value">
-            {{ option.label }}
-          </option>
-        </select>
+        <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.language') }}</label>
+        <CustomSelect
+          :model-value="settings.language || 'system'"
+          :options="languageOptions"
+          full-width
+          :aria-label="t('settings.language')"
+          @update:model-value="setLanguage"
+        />
       </div>
 
       <!-- Font Switcher -->
