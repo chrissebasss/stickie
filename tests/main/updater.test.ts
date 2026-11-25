@@ -23,9 +23,10 @@ describe('updater wrapper', () => {
     appMock.isPackaged = false
   })
 
-  it('returns an error result in unpacked builds without contacting GitHub', async () => {
+  it('returns a dev-mode result in unpacked builds without contacting GitHub', async () => {
     const result = await checkForUpdates()
     expect(result.error).toBe(true)
+    expect(result.devMode).toBe(true)
     expect(result.hasUpdate).toBe(false)
     expect(result.latestVersion).toBe('0.1.3')
     expect(updaterMock.checkForUpdates).not.toHaveBeenCalled()

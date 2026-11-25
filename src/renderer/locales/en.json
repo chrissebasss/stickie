@@ -57,6 +57,7 @@
     "updateFailed": "Update failed. Please try again.",
     "updateCheckFailed": "Could not check for updates",
     "updateManual": "Updates are managed manually on macOS",
+    "updateDev": "Updates are disabled in development",
     "viewReleases": "View releases on GitHub",
     "done": "Done"
   },

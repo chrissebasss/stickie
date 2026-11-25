@@ -248,7 +248,8 @@ function toggleLogin(event: Event) {
         </div>
 
         <div v-if="updateStatus" aria-live="polite" class="text-[11px] flex items-center justify-between text-stone-600 dark:text-stone-400">
-          <span v-if="updateStatus.manualOnly">{{ t('settings.updateManual') }}</span>
+          <span v-if="updateStatus.devMode">{{ t('settings.updateDev') }}</span>
+          <span v-else-if="updateStatus.manualOnly">{{ t('settings.updateManual') }}</span>
           <span v-else-if="updateStatus.error">{{ t('settings.updateCheckFailed') }}</span>
           <span v-else-if="updateStatus.hasUpdate" class="text-amber-700 dark:text-amber-300 font-medium">
             {{ t('settings.updateAvailable', { version: updateStatus.latestVersion }) }}
@@ -264,7 +265,7 @@ function toggleLogin(event: Event) {
             {{ downloading ? t('settings.downloadingUpdate') : downloaded ? t('settings.installUpdate') : t('settings.downloadUpdate') }}
           </button>
           <button
-            v-else-if="updateStatus.error"
+            v-else-if="updateStatus.error && !updateStatus.devMode"
             class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
             @click="openRelease"
           >

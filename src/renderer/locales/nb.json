@@ -57,6 +57,7 @@
     "updateFailed": "Oppdatering mislyktes. Prøv igjen.",
     "updateCheckFailed": "Kunne ikke se etter oppdateringer",
     "updateManual": "Oppdateringer håndteres manuelt på macOS",
+    "updateDev": "Oppdateringer er avslått i utviklingsmodus",
     "viewReleases": "Se utgivelser på GitHub",
     "done": "Ferdig"
   },
