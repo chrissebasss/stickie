@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { Plus, Pin, PinOff, Palette, X, SlidersHorizontal } from 'lucide-vue-next'
 import type { NoteColor, PresetColorId } from '../../../shared/types'
@@ -23,6 +23,29 @@ const emit = defineEmits<{
 const { t } = useI18n()
 
 const showColorPicker = ref(false)
+const colorPickerRef = ref<HTMLElement | null>(null)
+
+function onDocumentPointerDown(event: PointerEvent) {
+  if (showColorPicker.value && colorPickerRef.value && !colorPickerRef.value.contains(event.target as Node)) {
+    showColorPicker.value = false
+  }
+}
+
+function onKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && showColorPicker.value) {
+    showColorPicker.value = false
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onDocumentPointerDown, true)
+  document.addEventListener('keydown', onKeyDown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true)
+  document.removeEventListener('keydown', onKeyDown)
+})
 
 const presets: PresetColorId[] = ['yellow', 'green', 'blue', 'pink']
 
@@ -66,7 +89,7 @@ function onCustomColor(event: Event) {
       </button>
 
       <!-- Color picker toggle -->
-      <div class="relative">
+      <div ref="colorPickerRef" class="relative">
         <button
           class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
           :aria-label="t('note.color')"

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useI18n } from 'vue-i18n'
 import type { Editor } from '@tiptap/vue-3'
 import {
@@ -31,6 +31,29 @@ const { t } = useI18n()
 
 type SubToolbar = 'color' | 'highlight' | 'table' | null
 const activeSubToolbar = ref<SubToolbar>(null)
+const toolbarRef = ref<HTMLElement | null>(null)
+
+function onDocumentPointerDown(event: PointerEvent) {
+  if (activeSubToolbar.value && toolbarRef.value && !toolbarRef.value.contains(event.target as Node)) {
+    activeSubToolbar.value = null
+  }
+}
+
+function onKeyDown(event: KeyboardEvent) {
+  if (event.key === 'Escape' && activeSubToolbar.value) {
+    activeSubToolbar.value = null
+  }
+}
+
+onMounted(() => {
+  document.addEventListener('pointerdown', onDocumentPointerDown, true)
+  document.addEventListener('keydown', onKeyDown)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('pointerdown', onDocumentPointerDown, true)
+  document.removeEventListener('keydown', onKeyDown)
+})
 
 const textColors = ['#111827', '#dc2626', '#2563eb', '#16a34a', '#d97706', '#9333ea']
 const highlightColors = ['#fef08a', '#bbf7d0', '#bfdbfe', '#fbcfe8', '#fed7aa']
@@ -87,7 +110,7 @@ function insertCustomTable() {
 </script>
 
 <template>
-  <div v-if="editor" class="flex flex-col border-b border-black/10 dark:border-white/10 select-none">
+  <div ref="toolbarRef" v-if="editor" class="flex flex-col border-b border-black/10 dark:border-white/10 select-none">
     <!-- Main Toolbar Row -->
     <div
       class="flex items-center space-x-0.5 px-2 py-1 bg-black/[0.03] dark:bg-black/25 text-xs text-note-fg/75 overflow-x-auto select-none transition-colors"
