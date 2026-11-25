@@ -2,6 +2,7 @@ import { BrowserWindow } from 'electron'
 import { join } from 'path'
 import type { SettingsStore } from '../store/settingsStore'
 import { getAppIconPath } from '../icon'
+import { ensureVisible, getDisplayTopology } from '../displays'
 
 export function createManagerWindow(
   settingsStore: SettingsStore,
@@ -9,7 +10,13 @@ export function createManagerWindow(
   isQuitting?: () => boolean
 ): BrowserWindow {
   const cachedSettings = settingsStore.getCached()
-  const savedBounds = cachedSettings.managerBounds
+  const rawBounds = cachedSettings.managerBounds
+  const savedBounds = rawBounds
+    ? (() => {
+        const { workAreas, primary } = getDisplayTopology()
+        return ensureVisible(rawBounds, workAreas, primary)
+      })()
+    : undefined
 
   const win = new BrowserWindow({
     icon: getAppIconPath(),

@@ -183,21 +183,33 @@ fi
 
 echo "Installing ${APP_NAME} from ${APPIMAGE_SRC}..."
 
-stop_running_stickie() {
-  local pids=""
-  if command -v pgrep >/dev/null 2>&1; then
-    pids="$(pgrep -f -- "$APPIMAGE_DEST" 2>/dev/null || true)"
+find_running_stickie_pids() {
+  if ! command -v pgrep >/dev/null 2>&1; then
+    return 0
   fi
+  {
+    pgrep -x stickie 2>/dev/null || true
+    pgrep -f -- "$APPIMAGE_DEST" 2>/dev/null || true
+    pgrep -f '/\.mount_Stickie[^/]*/stickie' 2>/dev/null || true
+  } | awk -v self="$$" '$1 != "" && $1 != self && !seen[$1]++'
+}
+
+stop_running_stickie() {
+  local pids
+  pids="$(find_running_stickie_pids)"
   if [[ -n "$pids" ]]; then
     echo "Stopping running ${APP_NAME} instance(s)..."
     $SUDO kill -TERM $pids 2>/dev/null || true
     for _ in 1 2 3 4 5 6; do
-      if ! pgrep -f -- "$APPIMAGE_DEST" >/dev/null 2>&1; then
+      if [[ -z "$(find_running_stickie_pids)" ]]; then
         return 0
       fi
       sleep 0.5
     done
-    $SUDO kill -KILL $pids 2>/dev/null || true
+    pids="$(find_running_stickie_pids)"
+    if [[ -n "$pids" ]]; then
+      $SUDO kill -KILL $pids 2>/dev/null || true
+    fi
   fi
 }
 
@@ -212,9 +224,11 @@ LAUNCHER_TMP="$(mktemp)"
 cat >"$LAUNCHER_TMP" <<EOF
 #!/usr/bin/env sh
 set -eu
+unset ELECTRON_RUN_AS_NODE
 APPIMAGE="${APPIMAGE_DEST}"
 if [ -z "\${APPIMAGE_EXTRACT_AND_RUN:-}" ]; then
-  if command -v ldconfig >/dev/null 2>&1 && ! ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2'; then
+  if grep -qE '^NoNewPrivs:[[:space:]]*1\$' /proc/self/status 2>/dev/null || \
+     (command -v ldconfig >/dev/null 2>&1 && ! ldconfig -p 2>/dev/null | grep -q 'libfuse\.so\.2'); then
     export APPIMAGE_EXTRACT_AND_RUN=1
   fi
 fi
@@ -276,4 +290,20 @@ if [[ "$SYSTEM_INSTALL" == false ]]; then
       echo "  export PATH=\"\$HOME/.local/bin:\$PATH\""
       ;;
   esac
+fi
+
+if [[ "$EUID" -ne 0 && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
+  LOG_FILE="${XDG_RUNTIME_DIR:-/tmp}/stickie-launch.log"
+  echo "Launching ${APP_NAME}..."
+  if command -v setsid >/dev/null 2>&1; then
+    setsid -f "$BIN_DEST" </dev/null >"$LOG_FILE" 2>&1 || true
+  else
+    nohup "$BIN_DEST" </dev/null >"$LOG_FILE" 2>&1 &
+    disown 2>/dev/null || true
+  fi
+  sleep 1
+  if [[ -z "$(find_running_stickie_pids)" ]]; then
+    echo "Warning: ${APP_NAME} did not stay running. Output from ${LOG_FILE}:" >&2
+    cat "$LOG_FILE" >&2 || true
+  fi
 fi

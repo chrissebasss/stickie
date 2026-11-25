@@ -1,4 +1,4 @@
-import { app, BrowserWindow, protocol, net, Menu, MenuItem } from 'electron'
+import { app, BrowserWindow, protocol, net, Menu, MenuItem, powerMonitor } from 'electron'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { v4 as uuidv4 } from 'uuid'
@@ -146,6 +146,10 @@ app.whenReady().then(async () => {
   // Always open manager window on startup (AGENTS.md 4.8)
   const managerWin = createManagerWindow(settingsStore, onManagerClose, isQuittingFn)
   windowManager.setManagerWindow(managerWin)
+  managerWin.on('session-end', () => {
+    isQuitting = true
+    void flushAndExit()
+  })
 
   setupTray({
     onNewNote: async () => {
@@ -236,6 +240,11 @@ app.on('before-quit', (e) => {
       app.exit(0)
     })
   }
+})
+
+powerMonitor.on('shutdown', () => {
+  isQuitting = true
+  void flushAndExit()
 })
 
 process.on('SIGTERM', async () => {

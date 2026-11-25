@@ -14,6 +14,7 @@ export class NoteStore {
   private debounceMs: number
   private index: Map<string, NoteIndexItem> = new Map()
   private pendingSaves: Map<string, { note: Note; timer: NodeJS.Timeout }> = new Map()
+  private writeQueues: Map<string, Promise<void>> = new Map()
   private indexListeners: Set<(items: NoteIndexItem[]) => void> = new Set()
 
   constructor(baseDir: string, options?: NoteStoreOptions) {
@@ -126,6 +127,8 @@ export class NoteStore {
         console.error(`[NoteStore] Error flushing note ${note.id}:`, err)
       }
     }
+
+    await Promise.allSettled(this.writeQueues.values())
   }
 
   public async discardIfEmpty(note: Note): Promise<boolean> {
@@ -155,6 +158,11 @@ export class NoteStore {
 
     this.index.delete(id)
     this.notifyIndexListeners()
+
+    const inFlight = this.writeQueues.get(id)
+    if (inFlight) {
+      await inFlight.catch(() => {})
+    }
 
     // Remove note file + bak
     const notePath = this.getNotePath(id)
@@ -221,16 +229,28 @@ export class NoteStore {
   }
 
   private async writeToDisk(note: Note): Promise<void> {
-    const notePath = this.getNotePath(note.id)
-    const data = JSON.stringify(note, null, 2)
-    await writeAtomic(notePath, data)
+    const doWrite = async () => {
+      const notePath = this.getNotePath(note.id)
+      const data = JSON.stringify(note, null, 2)
+      await writeAtomic(notePath, data)
 
-    // Orphan cleanup for assets
-    if (note.content) {
-      const referenced = extractReferencedAssetFiles(note.content, note.id)
-      cleanOrphanAssets(this.baseDir, note.id, referenced).catch((err) => {
-        console.warn(`[NoteStore] Error cleaning orphan assets for ${note.id}:`, err)
-      })
+      if (note.content) {
+        const referenced = extractReferencedAssetFiles(note.content, note.id)
+        cleanOrphanAssets(this.baseDir, note.id, referenced).catch((err) => {
+          console.warn(`[NoteStore] Error cleaning orphan assets for ${note.id}:`, err)
+        })
+      }
+    }
+
+    const prev = this.writeQueues.get(note.id) ?? Promise.resolve()
+    const run = prev.then(doWrite, doWrite)
+    this.writeQueues.set(note.id, run)
+    try {
+      await run
+    } finally {
+      if (this.writeQueues.get(note.id) === run) {
+        this.writeQueues.delete(note.id)
+      }
     }
   }
 }

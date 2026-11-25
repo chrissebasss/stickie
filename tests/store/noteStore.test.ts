@@ -168,5 +168,28 @@ describe('NoteStore', () => {
     expect(reloaded).not.toBeNull()
     expect(reloaded?.plainText).toBe('Original text')
   })
+
+  it('serializes concurrent saveNoteNow calls on the same note', async () => {
+    const base: Note = {
+      schemaVersion: 1,
+      id: 'concurrent',
+      title: 'Concurrent',
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
+      color: { kind: 'preset', id: 'yellow' },
+      bounds: { x: 0, y: 0, width: 300, height: 300 },
+      content: { type: 'doc' },
+      plainText: 'v0'
+    }
+
+    await Promise.all([
+      store.saveNoteNow({ ...base, plainText: 'v1' }),
+      store.saveNoteNow({ ...base, plainText: 'v2' }),
+      store.saveNoteNow({ ...base, plainText: 'v3' })
+    ])
+
+    const reloaded = await store.getNote('concurrent')
+    expect(reloaded?.plainText).toBe('v3')
+  })
 })
 
