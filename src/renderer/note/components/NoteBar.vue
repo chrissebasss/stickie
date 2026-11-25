@@ -69,13 +69,13 @@ function onCustomColor(event: Event) {
   >
     <!-- Left: Drag handle area -->
     <div class="flex-1 h-full flex items-center space-x-1" style="-webkit-app-region: drag;">
-      <img :src="stickieIcon" alt="" class="w-3.5 h-3.5 object-contain select-none pointer-events-none opacity-80" />
-      <span class="text-[11px] font-medium opacity-60 select-none">Stickie</span>
+      <img :src="stickieIcon" alt="" class="w-3.5 h-3.5 object-contain select-none pointer-events-none" />
+      <span class="text-[11px] font-medium opacity-90 select-none">Stickie</span>
     </div>
 
     <!-- Right: Interactive Actions -->
     <div
-      class="flex items-center space-x-0.5 opacity-60 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150"
+      class="flex items-center space-x-0.5 opacity-90 group-hover:opacity-100 focus-within:opacity-100 transition-opacity duration-150"
       style="-webkit-app-region: no-drag;"
     >
       <!-- New note -->
