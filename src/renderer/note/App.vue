@@ -6,6 +6,7 @@ import NoteEditor from './components/NoteEditor.vue'
 import type { Note, NoteColor, JSONContent } from '../../shared/types'
 import { getNoteColorScheme } from '../../shared/color'
 import { setAppLanguage } from '../i18n'
+import { applyFont } from '../../shared/font'
 
 const noteId = ref<string>('')
 const note = ref<Note | null>(null)
@@ -47,6 +48,7 @@ async function loadNote() {
     if (settings && settings.language) {
       setAppLanguage(settings.language)
     }
+    applyFont(settings?.font)
 
     const theme = await window.stickie.getTheme()
     isDark.value = theme.resolved === 'dark'
@@ -55,6 +57,10 @@ async function loadNote() {
     window.stickie.onThemeChanged((t) => {
       isDark.value = t.resolved === 'dark'
       document.documentElement.setAttribute('data-theme', t.resolved)
+    })
+
+    window.stickie.onSettingsChanged((updated) => {
+      applyFont(updated.font)
     })
 
     nextTick(() => {

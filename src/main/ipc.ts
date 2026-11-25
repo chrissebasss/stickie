@@ -182,6 +182,11 @@ export function registerIpcHandlers(
       if (patch.launchAtLogin !== undefined) {
         applyLoginItem(patch.launchAtLogin)
       }
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) {
+          win.webContents.send(IPC_CHANNELS.EVENT_SETTINGS_CHANGED, updated)
+        }
+      }
       return updated
     }
   )

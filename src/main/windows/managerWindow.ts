@@ -26,7 +26,7 @@ export function createManagerWindow(
     height: savedBounds?.height || 500,
     minWidth: 400,
     minHeight: 400,
-    title: 'Stickie - My Notes',
+    title: 'Stickie',
     show: false,
     autoHideMenuBar: true,
     webPreferences: {

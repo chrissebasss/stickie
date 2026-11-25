@@ -43,6 +43,16 @@ const api: StickieAPI = {
     }
   },
 
+  onSettingsChanged: (callback: (settings: Settings) => void) => {
+    const handler = (_: IpcRendererEvent, settings: Settings) => {
+      callback(settings)
+    }
+    ipcRenderer.on(IPC_CHANNELS.EVENT_SETTINGS_CHANGED, handler)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_SETTINGS_CHANGED, handler)
+    }
+  },
+
   onIndexUpdated: (callback: (items: NoteIndexItem[]) => void) => {
     const handler = (_: IpcRendererEvent, items: NoteIndexItem[]) => {
       callback(items)

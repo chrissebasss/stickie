@@ -25,12 +25,12 @@ function clear() {
 
 <template>
   <div class="relative flex items-center w-full">
-    <Search class="absolute left-3 w-4 h-4 text-stone-400 pointer-events-none" />
+    <Search class="absolute left-3 w-4 h-4 text-stone-600 dark:text-stone-400 pointer-events-none" />
     <input
       type="text"
       :value="modelValue"
       :placeholder="placeholder || t('manager.searchPlaceholder')"
-      class="w-full pl-9 pr-8 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-400 text-sm border border-stone-200 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+      class="w-full pl-9 pr-8 py-2 rounded-lg bg-stone-100 dark:bg-stone-800 text-stone-900 dark:text-stone-100 placeholder-stone-500 dark:placeholder-stone-400 text-sm border border-stone-200 dark:border-stone-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
       @input="onInput"
     />
     <button

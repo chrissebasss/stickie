@@ -1,7 +1,6 @@
 {
   "app": {
-    "title": "Stickie",
-    "myNotes": "Mine notater"
+    "title": "Stickie"
   },
   "manager": {
     "newNote": "Nytt notat",
@@ -34,6 +33,11 @@
     "langSystem": "Systemstandard",
     "langEn": "English",
     "langNb": "Norsk (bokmål)",
+    "font": "Skrifttype",
+    "fontSystem": "System",
+    "fontSans": "Sans",
+    "fontSerif": "Serif",
+    "fontMono": "Mono",
     "reopenOnLaunch": "Gjenåpne åpne notater ved oppstart",
     "launchAtLogin": "Start automatisk ved pålogging",
     "done": "Ferdig"

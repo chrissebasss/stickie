@@ -6,6 +6,9 @@ module.exports = {
   darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['var(--app-font)', 'system-ui', 'sans-serif']
+      },
       colors: {
         note: {
           bg: 'var(--note-bg)',

@@ -3,6 +3,7 @@
 @tailwind utilities;
 
 :root {
+  --app-font: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Noto Sans', sans-serif;
   --note-bg: #fef08a;
   --note-fg: #1c1917;
   --bar-bg: #fde047;
@@ -19,7 +20,7 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-family: var(--app-font);
   overflow: hidden;
 }
 

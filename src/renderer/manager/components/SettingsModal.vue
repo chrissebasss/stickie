@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, Sun, Moon, Laptop, Languages } from 'lucide-vue-next'
-import type { Settings, ThemeMode, LanguageMode } from '../../../shared/types'
+import { X, Sun, Moon, Laptop, Languages, Type } from 'lucide-vue-next'
+import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../shared/types'
 
 const props = defineProps<{
   settings: Settings
@@ -21,6 +21,10 @@ function setTheme(theme: ThemeMode) {
 
 function setLanguage(language: LanguageMode) {
   emit('update', { language })
+}
+
+function setFont(font: FontMode) {
+  emit('update', { font })
 }
 
 function toggleReopen(event: Event) {
@@ -141,6 +145,29 @@ function toggleLogin(event: Event) {
           >
             <span class="text-xs font-bold mb-1">NO</span>
             {{ t('settings.langNb') }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Font Switcher -->
+      <div class="space-y-2">
+        <label class="text-xs font-medium text-stone-800 dark:text-stone-300 flex items-center space-x-1.5">
+          <Type class="w-3.5 h-3.5" />
+          <span>{{ t('settings.font') }}</span>
+        </label>
+        <div class="grid grid-cols-4 gap-2">
+          <button
+            v-for="f in (['system', 'sans', 'serif', 'mono'] as const)"
+            :key="f"
+            class="px-2 py-2 rounded-lg border text-xs font-medium transition-all text-center"
+            :class="
+              (settings.font || 'system') === f
+                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-700 dark:text-blue-400'
+                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-700 dark:text-stone-300'
+            "
+            @click="setFont(f)"
+          >
+            {{ t(`settings.font${f.charAt(0).toUpperCase()}${f.slice(1)}`) }}
           </button>
         </div>
       </div>

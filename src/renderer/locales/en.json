@@ -1,7 +1,6 @@
 {
   "app": {
-    "title": "Stickie",
-    "myNotes": "My notes"
+    "title": "Stickie"
   },
   "manager": {
     "newNote": "New note",
@@ -34,6 +33,11 @@
     "langSystem": "System default",
     "langEn": "English",
     "langNb": "Norsk (bokmål)",
+    "font": "Font",
+    "fontSystem": "System",
+    "fontSans": "Sans",
+    "fontSerif": "Serif",
+    "fontMono": "Mono",
     "reopenOnLaunch": "Reopen open notes on launch",
     "launchAtLogin": "Launch at login",
     "done": "Done"

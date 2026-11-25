@@ -41,7 +41,8 @@ export const IPC_CHANNELS = {
   // Push events (Main -> Renderer)
   EVENT_INDEX_UPDATED: 'event:index-updated',
   EVENT_THEME_CHANGED: 'event:theme-changed',
-  EVENT_NOTE_UPDATED: 'event:note-updated'
+  EVENT_NOTE_UPDATED: 'event:note-updated',
+  EVENT_SETTINGS_CHANGED: 'event:settings-changed'
 } as const
 
 export interface StickieAPI {
@@ -65,6 +66,7 @@ export interface StickieAPI {
   updateSettings: (patch: Partial<Settings>) => Promise<Settings>
   getTheme: () => Promise<{ mode: ThemeMode; resolved: ResolvedTheme }>
   onThemeChanged: (callback: (theme: { mode: ThemeMode; resolved: ResolvedTheme }) => void) => () => void
+  onSettingsChanged: (callback: (settings: Settings) => void) => () => void
   onIndexUpdated: (callback: (items: NoteIndexItem[]) => void) => () => void
   onNoteUpdated: (callback: (note: Note) => void) => () => void
 

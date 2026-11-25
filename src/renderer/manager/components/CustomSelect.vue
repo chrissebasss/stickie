@@ -65,15 +65,15 @@ onBeforeUnmount(() => {
   <div ref="dropdownRef" class="relative inline-block text-left select-none">
     <button
       type="button"
-      class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs text-stone-700 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
+      class="flex items-center space-x-1.5 px-2.5 py-1.5 rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 text-xs text-stone-800 dark:text-stone-200 hover:bg-stone-50 dark:hover:bg-stone-700/50 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm transition-all"
       :aria-expanded="isOpen"
       aria-haspopup="listbox"
       @click="toggle"
     >
-      <ArrowUpDown v-if="icon !== false" class="w-3.5 h-3.5 text-stone-400 dark:text-stone-500 shrink-0" />
+      <ArrowUpDown v-if="icon !== false" class="w-3.5 h-3.5 text-stone-600 dark:text-stone-400 shrink-0" />
       <span class="font-medium truncate">{{ currentLabel }}</span>
       <ChevronDown
-        class="w-3 h-3 text-stone-400 dark:text-stone-500 transition-transform duration-150 shrink-0"
+        class="w-3 h-3 text-stone-600 dark:text-stone-400 transition-transform duration-150 shrink-0"
         :class="{ 'rotate-180': isOpen }"
       />
     </button>

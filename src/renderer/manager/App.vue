@@ -8,6 +8,7 @@ import DeleteConfirmModal from './components/DeleteConfirmModal.vue'
 import SettingsModal from './components/SettingsModal.vue'
 import CustomSelect from './components/CustomSelect.vue'
 import { setAppLanguage } from '../i18n'
+import { applyFont } from '../../shared/font'
 import type { NoteIndexItem, Settings } from '../../shared/types'
 import stickieIcon from '../assets/icon.png'
 
@@ -29,6 +30,7 @@ const settings = ref<Settings>({
   schemaVersion: 1,
   theme: 'system',
   language: 'system',
+  font: 'system',
   reopenNotesOnLaunch: false,
   openNoteIds: [],
   alwaysOnTop: false,
@@ -43,6 +45,7 @@ onMounted(async () => {
     if (settings.value.language) {
       setAppLanguage(settings.value.language)
     }
+    applyFont(settings.value.font)
 
     const theme = await window.stickie.getTheme()
     isDark.value = theme.resolved === 'dark'
@@ -120,6 +123,9 @@ async function updateSettings(patch: Partial<Settings>) {
     if (patch.language) {
       setAppLanguage(patch.language)
     }
+    if (patch.font) {
+      applyFont(patch.font)
+    }
   }
 }
 
@@ -147,23 +153,23 @@ async function exportNote(note: NoteIndexItem) {
           class="w-8 h-8 object-contain drop-shadow-sm select-none"
         />
         <div>
-          <h1 class="text-base font-bold tracking-tight">Stickie</h1>
-          <p class="text-[11px] text-stone-500 dark:text-stone-400">{{ t('app.myNotes') }}</p>
+          <h1 class="text-base font-bold tracking-tight text-stone-900 dark:text-stone-100">Stickie</h1>
         </div>
       </div>
 
       <!-- Quick Actions -->
       <div class="flex items-center space-x-2">
         <button
-          class="flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium shadow-sm transition-colors focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          class="p-2 rounded-lg border border-yellow-400 dark:border-yellow-500/80 bg-yellow-300 hover:bg-yellow-400 text-stone-900 shadow-sm transition-colors focus:ring-2 focus:ring-yellow-500 focus:outline-none"
+          :title="t('manager.newNote')"
+          :aria-label="t('manager.newNote')"
           @click="createNote"
         >
           <Plus class="w-4 h-4" />
-          <span>{{ t('manager.newNote') }}</span>
         </button>
 
         <button
-          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
+          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
           :title="t('manager.importNotes')"
           :aria-label="t('manager.importNotes')"
           @click="importFiles"
@@ -172,7 +178,7 @@ async function exportNote(note: NoteIndexItem) {
         </button>
 
         <button
-          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
+          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
           :title="t('manager.closeAllNotes')"
           :aria-label="t('manager.closeAllNotes')"
           @click="closeAllNotes"
@@ -181,7 +187,7 @@ async function exportNote(note: NoteIndexItem) {
         </button>
 
         <button
-          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-600 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
+          class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
           :title="t('manager.settings')"
           :aria-label="t('manager.settings')"
           @click="showSettings = true"
@@ -225,14 +231,14 @@ async function exportNote(note: NoteIndexItem) {
         v-else
         class="h-full flex flex-col items-center justify-center text-center p-8 space-y-3"
       >
-        <div class="w-12 h-12 rounded-2xl bg-stone-200/60 dark:bg-stone-800 flex items-center justify-center text-stone-400">
+        <div class="w-12 h-12 rounded-2xl bg-stone-200/60 dark:bg-stone-800 flex items-center justify-center text-stone-600 dark:text-stone-400">
           <StickyNote class="w-6 h-6" />
         </div>
         <div class="space-y-1">
-          <p class="text-sm font-semibold text-stone-700 dark:text-stone-300">
+          <p class="text-sm font-semibold text-stone-800 dark:text-stone-300">
             {{ searchQuery ? t('manager.noMatchTitle') : t('manager.noNotesTitle') }}
           </p>
-          <p class="text-xs text-stone-400 max-w-xs">
+          <p class="text-xs text-stone-600 dark:text-stone-400 max-w-xs">
             {{ searchQuery ? t('manager.noMatchDesc') : t('manager.noNotesDesc') }}
           </p>
         </div>

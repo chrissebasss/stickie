@@ -25,7 +25,7 @@ export function setupTray(callbacks: TrayCallbacks): Tray | null {
         click: () => callbacks.onNewNote()
       },
       {
-        label: 'My notes',
+        label: 'Show Stickie',
         click: () => callbacks.onShowManager()
       },
       {
