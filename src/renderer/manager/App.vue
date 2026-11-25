@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload, Download, X } from 'lucide-vue-next'
+import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload, Download, RotateCw, X } from 'lucide-vue-next'
 import SearchBar from './components/SearchBar.vue'
 import NoteCard from './components/NoteCard.vue'
 import DeleteConfirmModal from './components/DeleteConfirmModal.vue'
@@ -9,6 +9,7 @@ import SettingsModal from './components/SettingsModal.vue'
 import CustomSelect from './components/CustomSelect.vue'
 import { setAppLanguage } from '../i18n'
 import { applyFont } from '../../shared/font'
+import { clampProgress } from '../../shared/updateInfo'
 import type { NoteIndexItem, Settings } from '../../shared/types'
 import type { UpdateCheckResult } from '../../shared/version'
 import stickieIcon from '../assets/icon.png'
@@ -32,6 +33,11 @@ const showSettings = ref(false)
 const noteToDelete = ref<NoteIndexItem | null>(null)
 const updateInfo = ref<UpdateCheckResult | null>(null)
 const updateDismissed = ref(false)
+const updateDownloading = ref(false)
+const updateDownloadingProgress = ref(0)
+const updateDownloaded = ref(false)
+const updateInstalling = ref(false)
+const updateError = ref(false)
 
 const settings = ref<Settings>({
   schemaVersion: 1,
@@ -158,8 +164,35 @@ async function exportNote(note: NoteIndexItem) {
   }
 }
 
-function openExternal(url: string) {
-  window.stickie?.openExternal(url)
+async function downloadUpdate() {
+  if (!window.stickie || updateDownloading.value || updateDownloaded.value) return
+  updateDownloading.value = true
+  updateError.value = false
+  updateDownloadingProgress.value = 0
+  const stopProgress = window.stickie.onUpdateProgress((percent) => {
+    updateDownloadingProgress.value = clampProgress(percent)
+  })
+  try {
+    await window.stickie.downloadUpdate()
+    updateDownloaded.value = true
+  } catch {
+    updateError.value = true
+  } finally {
+    updateDownloading.value = false
+    stopProgress()
+  }
+}
+
+async function installUpdate() {
+  if (!window.stickie || updateInstalling.value) return
+  updateInstalling.value = true
+  updateError.value = false
+  try {
+    await window.stickie.installUpdate()
+  } catch {
+    updateError.value = true
+    updateInstalling.value = false
+  }
 }
 </script>
 
@@ -224,13 +257,22 @@ function openExternal(url: string) {
       class="px-6 py-2 bg-yellow-100 dark:bg-yellow-950/60 border-b border-yellow-300 dark:border-yellow-700/60 flex items-center justify-between text-xs text-stone-900 dark:text-yellow-100"
     >
       <span>{{ t('settings.updateAvailable', { version: updateInfo.latestVersion }) }}</span>
+      <span
+        v-if="updateDownloading || updateDownloaded || updateError"
+        aria-live="polite"
+        class="ml-2"
+        :class="updateError ? 'text-red-700 dark:text-red-300' : ''"
+      >
+        {{ updateError ? t('settings.updateFailed') : updateDownloading ? t('settings.updateProgress', { percent: updateDownloadingProgress }) : t('settings.updateDownloaded') }}
+      </span>
       <div class="flex items-center space-x-2">
         <button
-          class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-yellow-300 hover:bg-yellow-400 text-stone-900 font-medium transition-colors"
-          @click="openExternal(updateInfo.releaseUrl)"
+          class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-yellow-300 hover:bg-yellow-400 text-stone-900 font-medium transition-colors disabled:opacity-60"
+          :disabled="updateDownloading || updateInstalling"
+          @click="updateDownloaded ? installUpdate() : downloadUpdate()"
         >
-          <Download class="w-3.5 h-3.5" />
-          <span>{{ t('settings.downloadUpdate') }}</span>
+          <component :is="updateDownloaded ? RotateCw : Download" class="w-3.5 h-3.5" />
+          <span>{{ updateDownloading ? t('settings.downloadingUpdate') : updateDownloaded ? t('settings.installUpdate') : t('settings.downloadUpdate') }}</span>
         </button>
         <button
           class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"

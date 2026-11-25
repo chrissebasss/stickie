@@ -90,6 +90,19 @@ const api: StickieAPI = {
     ipcRenderer.invoke(IPC_CHANNELS.EXPORT_NOTE, noteId, format),
 
   checkForUpdates: () => ipcRenderer.invoke(IPC_CHANNELS.APP_CHECK_UPDATES),
+  downloadUpdate: () => ipcRenderer.invoke(IPC_CHANNELS.APP_DOWNLOAD_UPDATE),
+  installUpdate: () => ipcRenderer.invoke(IPC_CHANNELS.APP_INSTALL_UPDATE),
+
+  onUpdateProgress: (handler: (percent: number) => void) => {
+    const listener = (_: IpcRendererEvent, percent: number) => {
+      handler(percent)
+    }
+    ipcRenderer.on(IPC_CHANNELS.EVENT_UPDATE_PROGRESS, listener)
+    return () => {
+      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_UPDATE_PROGRESS, listener)
+    }
+  },
+
   openExternal: (url: string) => ipcRenderer.invoke(IPC_CHANNELS.APP_OPEN_EXTERNAL, url)
 }
 

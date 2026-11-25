@@ -50,9 +50,16 @@ describe('SettingsStore', () => {
     const settingsFile = join(testDir, 'settings.json')
     await fs.writeFile(settingsFile, '{ broken json ...')
 
-    const newStore = new SettingsStore(testDir)
-    const loaded = await newStore.load()
-    expect(loaded.theme).toBe('light')
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const newStore = new SettingsStore(testDir)
+      const loaded = await newStore.load()
+      expect(loaded.theme).toBe('light')
+    } finally {
+      warnSpy.mockRestore()
+      errorSpy.mockRestore()
+    }
   })
 
   it('serializes concurrent updates and flushes cleanly', async () => {

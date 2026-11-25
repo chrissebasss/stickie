@@ -12,6 +12,8 @@ import { setupDisplayListeners } from './displays'
 import { getAssetDiskPath } from './store/assets'
 import { setupTray, getTray, destroyTray } from './tray'
 import { applyLoginItem } from './loginItem'
+import { configureUpdater } from './updater'
+import { shouldBypassQuitGuard } from '../shared/updateInfo'
 
 // Register custom protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -69,8 +71,14 @@ const settingsStore = new SettingsStore(storageDir)
 const windowManager = new WindowManager(noteStore, settingsStore)
 
 let isQuitting = false
+let isInstallingUpdate = false
+
+export function setInstallingUpdate(value: boolean): void {
+  isInstallingUpdate = value
+}
 
 app.whenReady().then(async () => {
+  configureUpdater()
   protocol.handle('stickie-asset', async (request) => {
     try {
       const url = new URL(request.url)
@@ -130,7 +138,10 @@ app.whenReady().then(async () => {
     })
   })
 
-  registerIpcHandlers(noteStore, settingsStore, windowManager)
+  registerIpcHandlers(noteStore, settingsStore, windowManager, {
+    flushAndExit,
+    setInstallingUpdate
+  })
   setupDisplayListeners(windowManager, noteStore)
 
   const isQuittingFn = () => isQuitting
@@ -237,20 +248,28 @@ app.whenReady().then(async () => {
 })
 
 // Flush-on-exit handlers (AGENTS.md 4.5b)
-let hasFlushed = false
-const flushAndExit = async () => {
-  if (hasFlushed) return
-  hasFlushed = true
-  windowManager.setQuitting(true)
+let flushInFlight: Promise<void> | undefined
+const flushAndExit = async (): Promise<void> => {
+  if (flushInFlight) return flushInFlight
+  const flush = (async () => {
+    windowManager.setQuitting(true)
+    try {
+      await noteStore.flush()
+      await settingsStore.flush()
+    } catch (err) {
+      console.error('[App] Error during exit flush:', err)
+    }
+  })()
+  flushInFlight = flush
   try {
-    await noteStore.flush()
-    await settingsStore.flush()
-  } catch (err) {
-    console.error('[App] Error during exit flush:', err)
+    await flush
+  } finally {
+    flushInFlight = undefined
   }
 }
 
 app.on('before-quit', (e) => {
+  if (shouldBypassQuitGuard(isInstallingUpdate)) return
   if (!isQuitting) {
     isQuitting = true
     windowManager.setQuitting(true)

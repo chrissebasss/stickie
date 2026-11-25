@@ -1,4 +1,4 @@
-import { ipcMain, nativeTheme, BrowserWindow, dialog, net, app, shell } from 'electron'
+import { ipcMain, nativeTheme, BrowserWindow, dialog, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { IPC_CHANNELS } from '../shared/ipc-contract'
 import type {
@@ -15,11 +15,8 @@ import type { WindowManager } from './windows/windowManager'
 import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
-import { isNewerVersion, getLatestReleaseVersion, type UpdateCheckResult } from '../shared/version'
-
-const GITHUB_RELEASES_API_URL =
-  'https://api.github.com/repos/chrissebasss/stickie/releases/latest'
-const GITHUB_RELEASES_URL = 'https://github.com/chrissebasss/stickie/releases/latest'
+import { checkForUpdates, downloadUpdate, installUpdate } from './updater'
+import type { UpdateCheckResult } from '../shared/version'
 
 function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
   if (!prev) return true
@@ -33,7 +30,11 @@ function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
 export function registerIpcHandlers(
   noteStore: NoteStore,
   settingsStore: SettingsStore,
-  windowManager: WindowManager
+  windowManager: WindowManager,
+  shutdown: {
+    flushAndExit: () => Promise<void>
+    setInstallingUpdate: (value: boolean) => void
+  }
 ): void {
   // 1. Note: Get
   ipcMain.handle(IPC_CHANNELS.NOTE_GET, async (_, noteId: string): Promise<Note | null> => {
@@ -268,45 +269,29 @@ export function registerIpcHandlers(
 
   // 16. App: Check for updates & open external release link
   ipcMain.handle(IPC_CHANNELS.APP_CHECK_UPDATES, async (): Promise<UpdateCheckResult> => {
-    const currentVersion = app.getVersion()
+    return checkForUpdates()
+  })
+
+  ipcMain.handle(IPC_CHANNELS.APP_DOWNLOAD_UPDATE, async (): Promise<void> => {
+    await downloadUpdate((percent) => {
+      for (const win of BrowserWindow.getAllWindows()) {
+        if (!win.isDestroyed()) {
+          win.webContents.send(IPC_CHANNELS.EVENT_UPDATE_PROGRESS, percent)
+        }
+      }
+    })
+  })
+
+  ipcMain.handle(IPC_CHANNELS.APP_INSTALL_UPDATE, async (): Promise<void> => {
+    await shutdown.flushAndExit()
+    shutdown.setInstallingUpdate(true)
     try {
-      const response = await net.fetch(GITHUB_RELEASES_API_URL, {
-        headers: { 'Cache-Control': 'no-cache', Accept: 'application/vnd.github+json' },
-        signal: AbortSignal.timeout(8000)
-      })
-      if (!response.ok) {
-        return {
-          currentVersion,
-          latestVersion: currentVersion,
-          hasUpdate: false,
-          releaseUrl: GITHUB_RELEASES_URL,
-          error: true
-        }
-      }
-      const latestVersion = getLatestReleaseVersion(await response.json())
-      if (!latestVersion) {
-        return {
-          currentVersion,
-          latestVersion: currentVersion,
-          hasUpdate: false,
-          releaseUrl: GITHUB_RELEASES_URL,
-          error: true
-        }
-      }
-      return {
-        currentVersion,
-        latestVersion,
-        hasUpdate: isNewerVersion(latestVersion, currentVersion),
-        releaseUrl: GITHUB_RELEASES_URL
-      }
-    } catch {
-      return {
-        currentVersion,
-        latestVersion: currentVersion,
-        hasUpdate: false,
-        releaseUrl: GITHUB_RELEASES_URL,
-        error: true
-      }
+      installUpdate()
+      // The updater queues app.quit() on the next tick; disarm if no quit follows.
+      setImmediate(() => shutdown.setInstallingUpdate(false))
+    } catch (err) {
+      shutdown.setInstallingUpdate(false)
+      throw err
     }
   })
 

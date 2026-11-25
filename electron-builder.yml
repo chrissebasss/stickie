@@ -25,6 +25,7 @@ win:
   icon: resources/icons/icon.ico
 
 nsis:
+  artifactName: Stickie-Setup-${version}.${ext}
   oneClick: false
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: true

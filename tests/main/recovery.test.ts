@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -76,14 +76,21 @@ describe('Hardening: Kill & Crash Recovery', () => {
     const noteFilePath = join(testDir, 'notes', 'corrupted-note.json')
     await fs.writeFile(noteFilePath, '{"incomplete": true, ')
 
-    // Restart app
-    const store2 = new NoteStore(testDir)
-    await store2.init()
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      // Restart app
+      const store2 = new NoteStore(testDir)
+      await store2.init()
 
-    // Must not crash and must safely restore from .bak
-    const recovered = await store2.getNote('corrupted-note')
-    expect(recovered).not.toBeNull()
-    expect(recovered?.plainText).toBe('Good Data content')
+      // Must not crash and must safely restore from .bak
+      const recovered = await store2.getNote('corrupted-note')
+      expect(recovered).not.toBeNull()
+      expect(recovered?.plainText).toBe('Good Data content')
+    } finally {
+      warnSpy.mockRestore()
+      errorSpy.mockRestore()
+    }
   })
 })
 

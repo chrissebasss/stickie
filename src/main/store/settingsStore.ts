@@ -56,13 +56,26 @@ export class SettingsStore {
   }
 
   public async update(patch: Partial<Settings>): Promise<Settings> {
-    const current = await this.load()
-    const updated: Settings = {
-      ...current,
-      ...patch,
-      schemaVersion: CURRENT_SETTINGS_SCHEMA
+    let updated: Settings = this.cachedSettings
+      ? { ...this.cachedSettings }
+      : { ...DEFAULT_SETTINGS }
+
+    // Read the current settings inside the queue so concurrent updates do not
+    // all build on the same stale snapshot.
+    const run = async () => {
+      let current = this.cachedSettings
+      if (!current) {
+        const stored = await readJsonWithBackup<Settings>(this.settingsFilePath)
+        current = stored?.data ? this.migrate(stored.data) : { ...DEFAULT_SETTINGS }
+      }
+      updated = { ...current, ...patch, schemaVersion: CURRENT_SETTINGS_SCHEMA }
+      this.cachedSettings = { ...updated }
+      const snapshot = { ...updated }
+      await writeAtomic(this.settingsFilePath, JSON.stringify(snapshot, null, 2))
     }
-    await this.save(updated)
+    const result = this.writeQueue.then(run, run)
+    this.writeQueue = result.then(() => {}, () => {})
+    await result
     return { ...updated }
   }
 

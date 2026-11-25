@@ -70,7 +70,10 @@ ASSETS=(
   "dist/Stickie-${VERSION}.AppImage"
   "dist/stickie_${VERSION}_amd64.deb"
   "dist/stickie-${VERSION}.x86_64.rpm"
-  "dist/Stickie Setup ${VERSION}.exe"
+  "dist/Stickie-Setup-${VERSION}.exe"
+  "dist/latest.yml"
+  "dist/latest-linux.yml"
+  "dist/Stickie-Setup-${VERSION}.exe.blockmap"
 )
 for asset in "${ASSETS[@]}"; do
   if [[ ! -f "$asset" ]] && ! $DRY_RUN; then

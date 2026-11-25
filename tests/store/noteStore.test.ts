@@ -178,9 +178,16 @@ describe('NoteStore', () => {
     const noteFile = join(testDir, 'notes', 'recoverable.json')
     await fs.writeFile(noteFile, 'CORRUPT_BYTES')
 
-    const reloaded = await store.getNote('recoverable')
-    expect(reloaded).not.toBeNull()
-    expect(reloaded?.plainText).toBe('Original text')
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const reloaded = await store.getNote('recoverable')
+      expect(reloaded).not.toBeNull()
+      expect(reloaded?.plainText).toBe('Original text')
+    } finally {
+      warnSpy.mockRestore()
+      errorSpy.mockRestore()
+    }
   })
 
   it('serializes concurrent saveNoteNow calls on the same note', async () => {

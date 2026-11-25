@@ -50,7 +50,13 @@
     "upToDate": "Oppdatert (v{version})",
     "updateAvailable": "Oppdatering tilgjengelig: v{version}",
     "downloadUpdate": "Last ned",
+    "downloadingUpdate": "Laster ned...",
+    "installUpdate": "Installer og start på nytt",
+    "updateDownloaded": "Oppdateringen er lastet ned",
+    "updateProgress": "Laster ned: {percent}%",
+    "updateFailed": "Oppdatering mislyktes. Prøv igjen.",
     "updateCheckFailed": "Kunne ikke se etter oppdateringer",
+    "viewReleases": "Se utgivelser på GitHub",
     "done": "Ferdig"
   },
   "deleteModal": {

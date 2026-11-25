@@ -50,7 +50,13 @@
     "upToDate": "Up to date (v{version})",
     "updateAvailable": "Update available: v{version}",
     "downloadUpdate": "Download",
+    "downloadingUpdate": "Downloading...",
+    "installUpdate": "Install and restart",
+    "updateDownloaded": "Update downloaded",
+    "updateProgress": "Downloading: {percent}%",
+    "updateFailed": "Update failed. Please try again.",
     "updateCheckFailed": "Could not check for updates",
+    "viewReleases": "View releases on GitHub",
     "done": "Done"
   },
   "deleteModal": {

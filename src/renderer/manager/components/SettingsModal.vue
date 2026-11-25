@@ -4,6 +4,7 @@ import { useI18n } from 'vue-i18n'
 import { X, Sun, Moon, Laptop, Languages, Type, RefreshCw } from 'lucide-vue-next'
 import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../shared/types'
 import type { UpdateCheckResult } from '../../../shared/version'
+import { clampProgress } from '../../../shared/updateInfo'
 
 const props = defineProps<{
   settings: Settings
@@ -18,10 +19,18 @@ const { t } = useI18n()
 
 const checkingUpdates = ref(false)
 const updateStatus = ref<UpdateCheckResult | null>(null)
+const downloading = ref(false)
+const downloadingProgress = ref(0)
+const downloaded = ref(false)
+const installing = ref(false)
+const updateError = ref(false)
 
 async function checkUpdates() {
   if (!window.stickie || checkingUpdates.value) return
   checkingUpdates.value = true
+  downloaded.value = false
+  updateError.value = false
+  downloadingProgress.value = 0
   try {
     updateStatus.value = await window.stickie.checkForUpdates()
   } finally {
@@ -32,6 +41,41 @@ async function checkUpdates() {
 function openRelease() {
   if (updateStatus.value?.releaseUrl) {
     window.stickie?.openExternal(updateStatus.value.releaseUrl)
+  }
+}
+
+async function downloadUpdate() {
+  if (!window.stickie || downloading.value || downloaded.value) return
+  const version = updateStatus.value?.latestVersion
+  if (!version) return
+  downloading.value = true
+  updateError.value = false
+  downloadingProgress.value = 0
+  const stopProgress = window.stickie.onUpdateProgress((percent) => {
+    downloadingProgress.value = clampProgress(percent)
+  })
+  try {
+    await window.stickie.downloadUpdate()
+    if (updateStatus.value?.latestVersion === version) {
+      downloaded.value = true
+    }
+  } catch {
+    updateError.value = true
+  } finally {
+    downloading.value = false
+    stopProgress()
+  }
+}
+
+async function installUpdate() {
+  if (!window.stickie || installing.value) return
+  installing.value = true
+  updateError.value = false
+  try {
+    await window.stickie.installUpdate()
+  } catch {
+    updateError.value = true
+    installing.value = false
   }
 }
 
@@ -229,7 +273,7 @@ function toggleLogin(event: Event) {
           </button>
         </div>
 
-        <div v-if="updateStatus" class="text-[11px] flex items-center justify-between text-stone-600 dark:text-stone-400">
+        <div v-if="updateStatus" aria-live="polite" class="text-[11px] flex items-center justify-between text-stone-600 dark:text-stone-400">
           <span v-if="updateStatus.error">{{ t('settings.updateCheckFailed') }}</span>
           <span v-else-if="updateStatus.hasUpdate" class="text-amber-700 dark:text-amber-300 font-medium">
             {{ t('settings.updateAvailable', { version: updateStatus.latestVersion }) }}
@@ -238,11 +282,30 @@ function toggleLogin(event: Event) {
 
           <button
             v-if="updateStatus.hasUpdate"
+            class="text-blue-600 dark:text-blue-400 hover:underline font-medium disabled:opacity-50 disabled:no-underline"
+            :disabled="downloading || installing"
+            @click="downloaded ? installUpdate() : downloadUpdate()"
+          >
+            {{ downloading ? t('settings.downloadingUpdate') : downloaded ? t('settings.installUpdate') : t('settings.downloadUpdate') }}
+          </button>
+          <button
+            v-else-if="updateStatus.error"
             class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
             @click="openRelease"
           >
-            {{ t('settings.downloadUpdate') }}
+            {{ t('settings.viewReleases') }}
           </button>
+        </div>
+
+        <div
+          v-if="updateStatus?.hasUpdate && (downloading || downloaded || updateError)"
+          aria-live="polite"
+          class="text-[11px]"
+          :class="updateError ? 'text-red-600 dark:text-red-400' : 'text-stone-600 dark:text-stone-400'"
+        >
+          <span v-if="updateError">{{ t('settings.updateFailed') }}</span>
+          <span v-else-if="downloading">{{ t('settings.updateProgress', { percent: downloadingProgress }) }}</span>
+          <span v-else>{{ t('settings.updateDownloaded') }}</span>
         </div>
       </div>
 

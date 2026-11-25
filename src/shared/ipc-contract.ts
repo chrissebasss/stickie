@@ -41,13 +41,16 @@ export const IPC_CHANNELS = {
 
   // App
   APP_CHECK_UPDATES: 'app:check-updates',
+  APP_DOWNLOAD_UPDATE: 'app:download-update',
+  APP_INSTALL_UPDATE: 'app:install-update',
   APP_OPEN_EXTERNAL: 'app:open-external',
 
   // Push events (Main -> Renderer)
   EVENT_INDEX_UPDATED: 'event:index-updated',
   EVENT_THEME_CHANGED: 'event:theme-changed',
   EVENT_NOTE_UPDATED: 'event:note-updated',
-  EVENT_SETTINGS_CHANGED: 'event:settings-changed'
+  EVENT_SETTINGS_CHANGED: 'event:settings-changed',
+  EVENT_UPDATE_PROGRESS: 'event:update-progress'
 } as const
 
 export interface StickieAPI {
@@ -86,6 +89,9 @@ export interface StickieAPI {
 
   // App
   checkForUpdates: () => Promise<UpdateCheckResult>
+  downloadUpdate: () => Promise<void>
+  installUpdate: () => Promise<void>
+  onUpdateProgress: (handler: (percent: number) => void) => () => void
   openExternal: (url: string) => Promise<void>
 }
 

@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -52,10 +52,17 @@ describe('atomicFile', () => {
     // Simulate corruption of primary file (e.g. power cut mid-write before rename)
     await fs.writeFile(targetFile, '{ truncated json: ')
 
-    const result = await readJsonWithBackup<{ valid: string }>(targetFile)
-    expect(result).not.toBeNull()
-    expect(result?.recoveredFromBackup).toBe(true)
-    expect(result?.data).toEqual({ valid: 'data' })
+    const warnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+    try {
+      const result = await readJsonWithBackup<{ valid: string }>(targetFile)
+      expect(result).not.toBeNull()
+      expect(result?.recoveredFromBackup).toBe(true)
+      expect(result?.data).toEqual({ valid: 'data' })
+    } finally {
+      warnSpy.mockRestore()
+      errorSpy.mockRestore()
+    }
   })
 
   it('returns null if both primary and backup do not exist', async () => {
