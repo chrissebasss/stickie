@@ -1,4 +1,9 @@
 {
+  "_meta": {
+    "code": "nb",
+    "name": "Norsk (bokmål)",
+    "intlLocale": "nb-NO"
+  },
   "app": {
     "title": "Stickie"
   },

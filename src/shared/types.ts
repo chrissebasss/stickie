@@ -41,7 +41,7 @@ export interface NoteIndexItem {
 
 export type ThemeMode = 'system' | 'light' | 'dark'
 export type ResolvedTheme = 'light' | 'dark'
-export type LanguageMode = 'system' | 'en' | 'nb'
+export type LanguageMode = string
 export type FontMode = 'system' | 'sans' | 'serif' | 'mono'
 
 export interface Settings {

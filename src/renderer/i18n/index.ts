@@ -1,19 +1,40 @@
 import { createI18n } from 'vue-i18n'
-import en from '../locales/en.json'
-import nb from '../locales/nb.json'
 import type { LanguageMode } from '../../shared/types'
 
-export type SupportedLocale = 'en' | 'nb'
+type LocaleMeta = { code: string; name: string; intlLocale: string }
+type LocaleModule = { default: Record<string, unknown> & { _meta?: LocaleMeta } }
+
+const modules = import.meta.glob<LocaleModule>('../locales/*.json', { eager: true })
+
+const messages: Record<string, Record<string, unknown>> = Object.fromEntries(
+  Object.entries(modules).map(([path, module]) => [
+    path.split('/').pop()!.replace(/\.json$/, ''),
+    module.default
+  ])
+)
+
+export type SupportedLocale = string
+
+export const availableLocales: string[] = Object.keys(messages).sort((a, b) =>
+  a === 'en' ? -1 : b === 'en' ? 1 : a.localeCompare(b)
+)
+
+function metaFor(code: string): LocaleMeta | undefined {
+  return messages[code]?._meta as LocaleMeta | undefined
+}
+
+export function localeName(code: string): string {
+  return metaFor(code)?.name || code
+}
 
 export function resolveLocale(preference?: LanguageMode | string): SupportedLocale {
-  if (preference === 'nb') return 'nb'
-  if (preference === 'en') return 'en'
+  const requested = typeof preference === 'string' ? preference : ''
+  if (requested && requested !== 'system' && requested in messages) return requested
 
-  // Default to OS language
   const navLang = typeof navigator !== 'undefined' ? (navigator.language || '').toLowerCase() : ''
-  if (navLang.startsWith('nb') || navLang.startsWith('no') || navLang.startsWith('nn')) {
-    return 'nb'
-  }
+  const osCode = navLang.split('-')[0]
+  if (osCode === 'no' || osCode === 'nn') return 'nb'
+  if (osCode && osCode in messages) return osCode
   return 'en'
 }
 
@@ -21,18 +42,17 @@ export const i18n = createI18n({
   legacy: false,
   locale: resolveLocale('system'),
   fallbackLocale: 'en',
-  messages: {
-    en,
-    nb
-  }
+  messages: messages as never
 })
 
 export function resolveDateLocale(
   preference?: LanguageMode | string,
   systemDateLocale?: string
 ): string | undefined {
-  if (preference === 'nb') return 'nb-NO'
-  if (preference === 'en') return 'en-US'
+  const code = typeof preference === 'string' ? preference : ''
+  if (code && code !== 'system' && code in messages) {
+    return metaFor(code)?.intlLocale || systemDateLocale
+  }
   return systemDateLocale || undefined
 }
 
@@ -43,4 +63,3 @@ export function setAppLanguage(preference: LanguageMode | string): void {
     document.documentElement.setAttribute('lang', resolved)
   }
 }
-

@@ -45,6 +45,14 @@ Open the `.dmg` in `dist/`, drag Stickie to Applications, and start it from Appl
 
 You need Node.js 24 or newer, pnpm and a Mac. A signed and notarized build also needs an Apple Developer account and a macOS build machine. For development without installing, use `pnpm install && pnpm run dev`.
 
+## Translations
+
+Stickie discovers languages from `src/renderer/locales/*.json` when it builds. Every file needs a `_meta` block with `code`, `name` and `intlLocale`, plus the same keys as `en.json`. The native `name` appears in Settings and `intlLocale` controls date formatting.
+
+System default follows the OS language when a matching locale exists, and falls back to English otherwise. An unknown saved language also falls back to English.
+
+To add a language, add one JSON file, then run `pnpm run test:locales`. That check validates every locale file and runs with `pnpm run test`. The local generation scripts contain personal paths and stay out of git. The generator prints `Validation OK` before it writes a file. Press Enter in the worker tab, or close it, to stop llama-server.
+
 ## Development
 
 Prerequisites: Node.js 24 or newer and pnpm. Local development uses Node.js 26; CI uses 24.

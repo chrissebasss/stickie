@@ -5,7 +5,7 @@ Instructions for AI agents working in Stickie.
 ## Stack and Architecture
 
 - **Shell & Build:** Node.js 24+ (26 used locally, 24 in CI), Electron 45, `electron-vite`, `electron-builder` 26 (`NSIS` on Windows, `AppImage`/`deb`/`rpm` on Linux).
-- **UI & State:** Vue 3 (`<script setup>`), TypeScript strict, Pinia, Tailwind CSS, `lucide-vue-next` SVG icons, `vue-i18n` (`en`, `nb`), TipTap 3 (`StarterKit` includes `Underline`; `TextStyle` and `Table` use named imports).
+- **UI & State:** Vue 3 (`<script setup>`), TypeScript strict, Pinia, Tailwind CSS, `lucide-vue-next` SVG icons, `vue-i18n` with locales discovered at build time from `src/renderer/locales/*.json`, TipTap 3 (`StarterKit` includes `Underline`; `TextStyle` and `Table` use named imports).
 - **Testing:** Vitest (`pnpm run test`) and TypeScript (`pnpm run typecheck`).
 - **Process boundaries:** `src/main/` (Node/Electron), `src/preload/` (`contextBridge` exposing `window.stickie`), `src/shared/` (pure logic and `ipc-contract.ts`), `src/renderer/` (`manager` and `note` Vue apps). Keep `contextIsolation: true`, `nodeIntegration: false`, and `sandbox: true`.
 
@@ -31,6 +31,8 @@ Apply these skills automatically without waiting for the user to invoke them:
 - **`humanizer`**: Use whenever writing or updating documentation (`README.md`, `AGENTS.md`).
 - **Verification:** The agent runs typecheck, tests, build and syntax checks itself and reports the results. Do not ask the user to run commands the agent can run; only ask for checks that need a live GUI, another machine, or an external side effect.
 - **UI components:** Never use browser-native dialogs, alerts, prompts, selects or dropdowns. Use the project's Vue components, such as `CustomSelect` and the app's modals, so styling, keyboard handling and dark mode stay consistent.
+- **Locales:** Each JSON in `src/renderer/locales/` is discovered at build time. Its `_meta` block holds `code`, `name` and `intlLocale`; the Settings dropdown and date formatting read those fields. Adding a language means adding one JSON file with the same keys as `en.json`. Check the set with `pnpm run test:locales`, which also runs as part of `pnpm run test`.
+- **Local tooling:** `scripts/generate_locale.py` and `scripts/validate_locales.py` are gitignored personal tools. Do not commit them.
 
 ## Documentation Maintenance
 

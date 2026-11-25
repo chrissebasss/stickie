@@ -6,6 +6,7 @@ import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../share
 import type { UpdateCheckResult } from '../../../shared/version'
 import { clampProgress } from '../../../shared/updateInfo'
 import CustomSelect, { type SelectOption } from './CustomSelect.vue'
+import { availableLocales, localeName } from '../../i18n'
 
 const props = defineProps<{
   settings: Settings
@@ -20,9 +21,13 @@ const { t } = useI18n()
 
 const languageOptions = computed<SelectOption<LanguageMode>[]>(() => [
   { value: 'system', label: t('settings.langSystem') },
-  { value: 'en', label: t('settings.langEn') },
-  { value: 'nb', label: t('settings.langNb') }
+  ...availableLocales.map((code) => ({ value: code as LanguageMode, label: localeName(code) }))
 ])
+
+const selectedLanguage = computed<LanguageMode>(() => {
+  const current = props.settings.language || 'system'
+  return languageOptions.value.some((option) => option.value === current) ? current : 'system'
+})
 
 const checkingUpdates = ref(false)
 const updateStatus = ref<UpdateCheckResult | null>(null)
@@ -179,7 +184,7 @@ function toggleLogin(event: Event) {
       <div class="space-y-1.5">
         <label class="block text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.language') }}</label>
         <CustomSelect
-          :model-value="settings.language || 'system'"
+          :model-value="selectedLanguage"
           :options="languageOptions"
           full-width
           :aria-label="t('settings.language')"

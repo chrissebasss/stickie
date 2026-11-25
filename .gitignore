@@ -7,3 +7,6 @@ dist
 *.log
 .npmrc
 docs/
+scripts/generate_locale.py
+scripts/validate_locales.py
+__pycache__/
