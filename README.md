@@ -74,8 +74,25 @@ pnpm run test
 # Build for Linux (AppImage + .deb)
 pnpm run build:linux
 
+# Build Linux AppImage only
+pnpm run build:appimage
+
 # Build for Windows (NSIS installer)
 pnpm run build:win
+```
+
+### Installing on Linux (AppImage + Desktop Entry)
+Works on CachyOS, Arch, Ubuntu, Fedora, and any standard Linux desktop (KDE, GNOME, XFCE, etc.):
+
+```bash
+# Build AppImage and install for the current user (~/.local)
+./scripts/install-linux.sh
+
+# Or install system-wide (/opt/stickie, /usr/local/bin, /usr/share/applications)
+./scripts/install-linux.sh --system
+
+# Uninstall
+./scripts/install-linux.sh --uninstall
 ```
 
 ---

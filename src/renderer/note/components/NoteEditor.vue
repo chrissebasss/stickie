@@ -3,13 +3,12 @@ import { watch, onBeforeUnmount, onMounted, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
 import { useEditor, EditorContent } from '@tiptap/vue-3'
 import StarterKit from '@tiptap/starter-kit'
-import Underline from '@tiptap/extension-underline'
-import TextStyle from '@tiptap/extension-text-style'
+import { TextStyle } from '@tiptap/extension-text-style'
 import Color from '@tiptap/extension-color'
 import Highlight from '@tiptap/extension-highlight'
 import TaskList from '@tiptap/extension-task-list'
 import TaskItem from '@tiptap/extension-task-item'
-import Table from '@tiptap/extension-table'
+import { Table } from '@tiptap/extension-table'
 import TableRow from '@tiptap/extension-table-row'
 import TableHeader from '@tiptap/extension-table-header'
 import TableCell from '@tiptap/extension-table-cell'
@@ -56,7 +55,6 @@ const editor = useEditor({
     StarterKit.configure({
       heading: { levels: [1, 2, 3] }
     }),
-    Underline,
     TextStyle,
     Color,
     Highlight.configure({ multicolor: true }),
@@ -140,7 +138,7 @@ watch(
     if (editor.value && newContent && !editor.value.isFocused) {
       const isSame = JSON.stringify(editor.value.getJSON()) === JSON.stringify(newContent)
       if (!isSame) {
-        editor.value.commands.setContent(newContent, false)
+        editor.value.commands.setContent(newContent, { emitUpdate: false })
       }
     }
   }

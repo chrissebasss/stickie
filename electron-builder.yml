@@ -38,8 +38,9 @@ linux:
   icon: resources/icons/icon.png
   category: Utility
   desktop:
-    Name: Stickie
-    Comment: Cross-platform desktop sticky notes
-    StartupWMClass: stickie
-    Categories: Utility;TextEditor;
+    entry:
+      Name: Stickie
+      Comment: Cross-platform desktop sticky notes
+      StartupWMClass: stickie
+      Categories: Utility;TextEditor;
 
