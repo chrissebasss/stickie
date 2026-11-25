@@ -5,6 +5,20 @@ import { tmpdir } from 'os'
 import { NoteStore } from '@main/store/noteStore'
 import type { Note } from '@shared/types'
 
+function makeNote(id: string, plainText: string): Note {
+  return {
+    schemaVersion: 1,
+    id,
+    title: plainText,
+    createdAt: 1_700_000_000_000,
+    updatedAt: 1_700_000_000_000,
+    color: { kind: 'preset', id: 'yellow' },
+    bounds: { x: 0, y: 0, width: 300, height: 300 },
+    content: { type: 'doc' },
+    plainText
+  }
+}
+
 describe('NoteStore', () => {
   let testDir: string
   let store: NoteStore
@@ -213,6 +227,93 @@ describe('NoteStore', () => {
     await store.saveNoteNow({ ...note, plainText: 'Edited' }, { touchUpdatedAt: true })
     const afterEdit = await store.getNote('bounds-only')
     expect(afterEdit?.updatedAt).toBeGreaterThan(originalUpdatedAt)
+  })
+
+  it('refuses to delete files outside the notes directory', async () => {
+    const outside = join(testDir, 'outside.json')
+    await fs.writeFile(outside, 'keep me')
+
+    await expect(store.deleteNote('../outside')).rejects.toThrow(/invalid note id/i)
+    await expect(fs.access(outside)).resolves.toBeUndefined()
+  })
+
+  it('refuses to write notes outside the notes directory', async () => {
+    await expect(store.saveNoteNow(makeNote('../escape', 'text'))).rejects.toThrow(/invalid note id/i)
+    await expect(fs.access(join(testDir, 'escape.json'))).rejects.toThrow()
+  })
+
+  it('returns the pending note while its debounced write is blocked', async () => {
+    const base = makeNote('race-note', 'old text')
+    await store.saveNoteNow(base)
+
+    const realOpen = fs.open
+    let gate: Promise<void> | null = null
+    const openSpy = vi.spyOn(fs, 'open')
+    openSpy.mockImplementation(((...args: Parameters<typeof fs.open>) =>
+      gate ? gate.then(() => realOpen(...args)) : realOpen(...args)) as typeof fs.open)
+
+    let unblock = (): void => {}
+    gate = new Promise<void>((resolve) => { unblock = resolve })
+
+    try {
+      store.queueSave({ ...base, plainText: 'new text' })
+
+      const deadline = Date.now() + 2000
+      while (openSpy.mock.calls.length === 0 && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 5))
+      }
+      expect(openSpy).toHaveBeenCalled()
+
+      const duringWrite = await store.getNote('race-note')
+      expect(duringWrite?.plainText).toBe('new text')
+    } finally {
+      gate = null
+      unblock()
+      openSpy.mockRestore()
+    }
+
+    await store.flush()
+    expect((await store.getNote('race-note'))?.plainText).toBe('new text')
+  })
+
+  it('flush writes saves queued while the flush is still running', async () => {
+    const slowStore = new NoteStore(testDir, { debounceMs: 5000 })
+    await slowStore.init()
+    const base = makeNote('flush-race', 'first')
+    await slowStore.saveNoteNow(base)
+
+    const realOpen = fs.open
+    let gate: Promise<void> | null = null
+    const openSpy = vi.spyOn(fs, 'open')
+    openSpy.mockImplementation(((...args: Parameters<typeof fs.open>) =>
+      gate ? gate.then(() => realOpen(...args)) : realOpen(...args)) as typeof fs.open)
+
+    let unblock = (): void => {}
+    gate = new Promise<void>((resolve) => { unblock = resolve })
+
+    try {
+      slowStore.queueSave({ ...base, plainText: 'second' })
+      const flushing = slowStore.flush()
+
+      const deadline = Date.now() + 2000
+      while (openSpy.mock.calls.length === 0 && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 5))
+      }
+      expect(openSpy).toHaveBeenCalled()
+
+      slowStore.queueSave({ ...base, plainText: 'third' })
+      gate = null
+      unblock()
+      await flushing
+    } finally {
+      gate = null
+      unblock()
+      openSpy.mockRestore()
+    }
+
+    const raw = await fs.readFile(join(testDir, 'notes', 'flush-race.json'), 'utf-8')
+    expect((JSON.parse(raw) as Note).plainText).toBe('third')
+    await slowStore.flush()
   })
 })
 

@@ -86,5 +86,17 @@ describe('assets store', () => {
     expect(getAssetDiskPath(testDir, 'note-1', '../../etc/passwd')).toBeNull()
     expect(getAssetDiskPath(testDir, '..', 'image.png')).toBeNull()
   })
+
+  it('refuses to save an asset for a note id outside the assets directory', async () => {
+    await expect(saveAssetBuffer(testDir, '../escape', Buffer.from('image'), 'png'))
+      .rejects.toThrow(/invalid note id/i)
+    await expect(fs.access(join(testDir, 'escape'))).rejects.toThrow()
+  })
+
+  it('refuses to save an asset with a traversal extension', async () => {
+    await expect(saveAssetBuffer(testDir, 'note-1', Buffer.from('image'), '../../escape'))
+      .rejects.toThrow(/invalid image extension/i)
+    await expect(fs.access(join(testDir, 'assets', 'note-1', 'escape'))).rejects.toThrow()
+  })
 })
 

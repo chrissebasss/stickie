@@ -5,7 +5,18 @@ import type { JSONContent } from '../../shared/types'
 
 export const MAX_IMAGE_BYTES = 25 * 1024 * 1024 // 25 MB limit
 
+export function isValidNoteId(noteId: string): boolean {
+  return (
+    typeof noteId === 'string' &&
+    noteId.length > 0 &&
+    !noteId.includes('..') &&
+    !noteId.includes('/') &&
+    !noteId.includes('\\')
+  )
+}
+
 export function getAssetDirectory(baseDir: string, noteId: string): string {
+  if (!isValidNoteId(noteId)) throw new Error('Invalid note id')
   return join(baseDir, 'assets', noteId)
 }
 
@@ -37,6 +48,9 @@ export async function saveAssetBuffer(
 
   const hash = createHash('sha1').update(buffer).digest('hex')
   let ext = rawExt.replace(/^\./, '').toLowerCase()
+  if (ext.includes('..') || ext.includes('/') || ext.includes('\\')) {
+    throw new Error('Invalid image extension')
+  }
   if (!ext) ext = 'png'
 
   const filename = `${hash}.${ext}`

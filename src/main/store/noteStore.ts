@@ -3,7 +3,7 @@ import { join } from 'path'
 import type { Note, NoteIndexItem } from '../../shared/types'
 import { deriveTitle, isNoteEmpty } from '../../shared/title'
 import { writeAtomic, readJsonWithBackup, removeFileAndBackup } from './atomicFile'
-import { extractReferencedAssetFiles, cleanOrphanAssets } from './assets'
+import { extractReferencedAssetFiles, cleanOrphanAssets, isValidNoteId } from './assets'
 
 export interface NoteStoreOptions {
   debounceMs?: number
@@ -31,10 +31,12 @@ export class NoteStore {
   }
 
   public getNotePath(id: string): string {
+    if (!isValidNoteId(id)) throw new Error('Invalid note id')
     return join(this.notesDir, `${id}.json`)
   }
 
   public getNoteAssetsDir(id: string): string {
+    if (!isValidNoteId(id)) throw new Error('Invalid note id')
     return join(this.assetsDir, id)
   }
 
@@ -91,11 +93,15 @@ export class NoteStore {
     }
 
     const timer = setTimeout(async () => {
-      this.pendingSaves.delete(note.id)
       try {
         await this.writeToDisk(updatedNote)
       } catch (err) {
         console.error(`[NoteStore] Error saving debounced note ${note.id}:`, err)
+      } finally {
+        // Keep the note readable from memory until its write actually finishes.
+        if (this.pendingSaves.get(note.id)?.timer === timer) {
+          this.pendingSaves.delete(note.id)
+        }
       }
     }, this.debounceMs)
 
@@ -116,16 +122,21 @@ export class NoteStore {
   }
 
   public async flush(): Promise<void> {
-    const saves = Array.from(this.pendingSaves.entries())
-    this.pendingSaves.clear()
+    // Drain again: saves can be queued while an earlier write is still awaited.
+    while (this.pendingSaves.size > 0) {
+      const saves = Array.from(this.pendingSaves.entries())
+      this.pendingSaves.clear()
 
-    for (const [, { note, timer }] of saves) {
-      clearTimeout(timer)
-      try {
-        await this.writeToDisk(note)
-      } catch (err) {
-        console.error(`[NoteStore] Error flushing note ${note.id}:`, err)
+      for (const [, { note, timer }] of saves) {
+        clearTimeout(timer)
+        try {
+          await this.writeToDisk(note)
+        } catch (err) {
+          console.error(`[NoteStore] Error flushing note ${note.id}:`, err)
+        }
       }
+
+      await Promise.allSettled(this.writeQueues.values())
     }
 
     await Promise.allSettled(this.writeQueues.values())
