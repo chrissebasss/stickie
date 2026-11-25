@@ -105,15 +105,15 @@ export function deriveBarColor(bgHex: string): string {
 /**
  * Returns complete ColorScheme for a note in current theme.
  */
-export function getNoteColorScheme(color: NoteColor, isDark: boolean): ColorScheme {
+export function getNoteColorScheme(color: NoteColor, _isDark: boolean): ColorScheme {
   if (color.kind === 'preset') {
     const preset = PRESET_COLORS[color.id] || PRESET_COLORS.yellow
-    const variant = isDark ? preset.dark : preset.light
+    const variant = preset.light
     return {
       bg: variant.bg,
-      fg: isDark ? '#f9fafb' : pickTextColor(variant.bg),
+      fg: pickTextColor(variant.bg),
       barBg: variant.barBg,
-      barFg: isDark ? '#f9fafb' : pickTextColor(variant.barBg)
+      barFg: pickTextColor(variant.barBg)
     }
   }
 

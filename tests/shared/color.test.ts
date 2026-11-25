@@ -69,7 +69,8 @@ describe('color and contrast helpers', () => {
       expect(getContrastRatio(lightScheme.barBg, lightScheme.barFg)).toBeGreaterThanOrEqual(4.5)
 
       const darkScheme = getNoteColorScheme({ kind: 'preset', id: preset }, true)
-      expect(getContrastRatio(darkScheme.bg, darkScheme.fg)).toBeGreaterThanOrEqual(4.0)
+      expect(darkScheme).toEqual(lightScheme)
+      expect(getContrastRatio(darkScheme.bg, darkScheme.fg)).toBeGreaterThanOrEqual(4.5)
     }
   })
 })
