@@ -9,7 +9,7 @@
 - 📝 **Rich text editor:** Bold, italic, underline, strikethrough, text colors, highlighters, bullet lists, numbered lists, interactive checklists, and resizable tables.
 - 🖼️ **Images:** Paste from clipboard, drag and drop, or pick from disk, stored locally via `stickie-asset://` with automatic orphan cleanup.
 - 🎨 **Themes & colors:** Preset note colors (yellow, green, blue, pink) or custom hex colors with automatic WCAG text contrast, plus system/light/dark UI themes and font switching (`System`, `Sans`, `Serif`, `Mono`).
-- 🔍 **Manager window:** Live search with match highlighting, sort by updated date, created date, or title, and import/export (`.txt`, `.md`, `.html`, `.json`).
+- 🔍 **Manager window:** Live search with match highlighting, sort by updated date, created date, or title, with import (`.txt`, `.md`, `.html`, `.json`) and export (`.md`, `.json`).
 - 💾 **Safe storage:** Atomic writes (`.tmp` with `fsync`, rename, and `.bak` fallback) and flush on exit.
 - 🖥️ **Desktop integration:** Multi-monitor bounds safety, optional reopen-notes-on-launch, optional launch-at-login, self-update, and system tray controls.
 

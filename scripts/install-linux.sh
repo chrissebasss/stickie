@@ -189,9 +189,12 @@ find_running_stickie_pids() {
   fi
   {
     pgrep -x stickie 2>/dev/null || true
-    pgrep -f -- "$APPIMAGE_DEST" 2>/dev/null || true
-    pgrep -f '/\.mount_Stickie[^/]*/stickie' 2>/dev/null || true
-  } | awk -v self="$$" '$1 != "" && $1 != self && !seen[$1]++'
+  } | while read -r pid; do
+    exe="$(readlink -f "/proc/$pid/exe" 2>/dev/null || true)"
+    case "$exe" in
+      "$APPIMAGE_DEST"|*/.mount_*/stickie) echo "$pid" ;;
+    esac
+  done | awk -v self="$$" '$1 != "" && $1 != self && !seen[$1]++'
 }
 
 stop_running_stickie() {

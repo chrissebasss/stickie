@@ -16,14 +16,15 @@ import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
 import { checkForUpdates, downloadUpdate, installUpdate } from './updater'
+import { stableStringify } from '../shared/content'
 import type { UpdateCheckResult } from '../shared/version'
 
 function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
   if (!prev) return true
   return (
     prev.plainText !== next.plainText ||
-    JSON.stringify(prev.content) !== JSON.stringify(next.content) ||
-    JSON.stringify(prev.color) !== JSON.stringify(next.color)
+    stableStringify(prev.content) !== stableStringify(next.content) ||
+    stableStringify(prev.color) !== stableStringify(next.color)
   )
 }
 
