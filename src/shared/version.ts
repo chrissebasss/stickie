@@ -4,6 +4,7 @@ export interface UpdateCheckResult {
   hasUpdate: boolean
   releaseUrl: string
   error?: boolean
+  manualOnly?: boolean
 }
 
 interface ParsedVersion {

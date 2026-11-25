@@ -1,10 +1,11 @@
 <script setup lang="ts">
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, Sun, Moon, Laptop, Languages, Type, RefreshCw } from 'lucide-vue-next'
+import { X, Sun, Moon, Laptop, Type, RefreshCw } from 'lucide-vue-next'
 import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../shared/types'
 import type { UpdateCheckResult } from '../../../shared/version'
 import { clampProgress } from '../../../shared/updateInfo'
+import CustomSelect, { type SelectOption } from './CustomSelect.vue'
 
 const props = defineProps<{
   settings: Settings
@@ -17,6 +18,12 @@ const emit = defineEmits<{
 
 const { t } = useI18n()
 
+const languageOptions = computed<SelectOption<LanguageMode>[]>(() => [
+  { value: 'system', label: t('settings.langSystem') },
+  { value: 'en', label: t('settings.langEn') },
+  { value: 'nb', label: t('settings.langNb') }
+])
+
 const checkingUpdates = ref(false)
 const updateStatus = ref<UpdateCheckResult | null>(null)
 const downloading = ref(false)
@@ -26,7 +33,7 @@ const installing = ref(false)
 const updateError = ref(false)
 
 async function checkUpdates() {
-  if (!window.stickie || checkingUpdates.value) return
+  if (!window.stickie || checkingUpdates.value || downloading.value) return
   checkingUpdates.value = true
   downloaded.value = false
   updateError.value = false
@@ -171,46 +178,11 @@ function toggleLogin(event: Event) {
       <!-- Language Switcher -->
       <div class="space-y-2">
         <label class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.language') }}</label>
-        <div class="grid grid-cols-3 gap-2">
-          <button
-            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all text-center"
-            :class="
-              (settings.language || 'system') === 'system'
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
-            "
-            @click="setLanguage('system')"
-          >
-            <Languages class="w-4 h-4 mb-1" />
-            <span class="truncate w-full">{{ t('settings.langSystem') }}</span>
-          </button>
-
-          <button
-            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all"
-            :class="
-              settings.language === 'en'
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
-            "
-            @click="setLanguage('en')"
-          >
-            <span class="text-xs font-bold mb-1">EN</span>
-            {{ t('settings.langEn') }}
-          </button>
-
-          <button
-            class="flex flex-col items-center justify-center p-2 rounded-lg border text-xs font-medium transition-all"
-            :class="
-              settings.language === 'nb'
-                ? 'border-blue-500 bg-blue-50/50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400'
-                : 'border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-600 dark:text-stone-300'
-            "
-            @click="setLanguage('nb')"
-          >
-            <span class="text-xs font-bold mb-1">NO</span>
-            {{ t('settings.langNb') }}
-          </button>
-        </div>
+        <CustomSelect
+          :model-value="settings.language || 'system'"
+          :options="languageOptions"
+          @update:model-value="setLanguage"
+        />
       </div>
 
       <!-- Font Switcher -->
@@ -265,7 +237,7 @@ function toggleLogin(event: Event) {
           <span class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.updates') }}</span>
           <button
             class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-700 dark:text-stone-200 disabled:opacity-50"
-            :disabled="checkingUpdates"
+            :disabled="checkingUpdates || downloading"
             @click="checkUpdates"
           >
             <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': checkingUpdates }" />
@@ -274,7 +246,8 @@ function toggleLogin(event: Event) {
         </div>
 
         <div v-if="updateStatus" aria-live="polite" class="text-[11px] flex items-center justify-between text-stone-600 dark:text-stone-400">
-          <span v-if="updateStatus.error">{{ t('settings.updateCheckFailed') }}</span>
+          <span v-if="updateStatus.manualOnly">{{ t('settings.updateManual') }}</span>
+          <span v-else-if="updateStatus.error">{{ t('settings.updateCheckFailed') }}</span>
           <span v-else-if="updateStatus.hasUpdate" class="text-amber-700 dark:text-amber-300 font-medium">
             {{ t('settings.updateAvailable', { version: updateStatus.latestVersion }) }}
           </span>

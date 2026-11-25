@@ -11,7 +11,8 @@ export function resolveLinuxAutostartExec(
 }
 
 export function buildAutostartDesktopEntry(execPath: string): string {
-  const escapedExec = execPath.includes(' ') ? `"${execPath}"` : execPath
+  const escaped = execPath.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/%/g, '%%')
+  const escapedExec = /[\s"\\]/.test(escaped) ? `"${escaped}"` : escaped
   return [
     '[Desktop Entry]',
     'Type=Application',

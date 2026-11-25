@@ -56,6 +56,7 @@
     "updateProgress": "Laster ned: {percent}%",
     "updateFailed": "Oppdatering mislyktes. Prøv igjen.",
     "updateCheckFailed": "Kunne ikke se etter oppdateringer",
+    "updateManual": "Oppdateringer håndteres manuelt på macOS",
     "viewReleases": "Se utgivelser på GitHub",
     "done": "Ferdig"
   },

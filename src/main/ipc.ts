@@ -17,6 +17,7 @@ import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
 import { checkForUpdates, downloadUpdate, installUpdate } from './updater'
 import { stableStringify } from '../shared/content'
+import { isAllowedExternalUrl } from '../shared/url'
 import type { UpdateCheckResult } from '../shared/version'
 
 function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
@@ -297,7 +298,7 @@ export function registerIpcHandlers(
   })
 
   ipcMain.handle(IPC_CHANNELS.APP_OPEN_EXTERNAL, async (_, url: string): Promise<void> => {
-    if (typeof url === 'string' && url.startsWith('https://github.com/chrissebasss/stickie/')) {
+    if (typeof url === 'string' && isAllowedExternalUrl(url)) {
       await shell.openExternal(url)
     }
   })

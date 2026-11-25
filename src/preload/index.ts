@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer, IpcRendererEvent } from 'electron'
 import { IPC_CHANNELS, type StickieAPI } from '../shared/ipc-contract'
+import { normalizeSystemDateLocale } from '../shared/locale'
 import type {
   Note,
   NoteIndexItem,
@@ -11,10 +12,7 @@ import type {
 } from '../shared/types'
 
 function getSystemDateLocale(): string | undefined {
-  const raw = process.env.LC_ALL || process.env.LC_TIME || process.env.LANG
-  if (!raw) return undefined
-  const cleaned = raw.split('.')[0].split('@')[0].replace('_', '-')
-  return /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(cleaned) ? cleaned : undefined
+  return normalizeSystemDateLocale(process.env.LC_ALL || process.env.LC_TIME || process.env.LANG)
 }
 
 const api: StickieAPI = {
@@ -68,16 +66,6 @@ const api: StickieAPI = {
     ipcRenderer.on(IPC_CHANNELS.EVENT_INDEX_UPDATED, handler)
     return () => {
       ipcRenderer.removeListener(IPC_CHANNELS.EVENT_INDEX_UPDATED, handler)
-    }
-  },
-
-  onNoteUpdated: (callback: (note: Note) => void) => {
-    const handler = (_: IpcRendererEvent, note: Note) => {
-      callback(note)
-    }
-    ipcRenderer.on(IPC_CHANNELS.EVENT_NOTE_UPDATED, handler)
-    return () => {
-      ipcRenderer.removeListener(IPC_CHANNELS.EVENT_NOTE_UPDATED, handler)
     }
   },
 

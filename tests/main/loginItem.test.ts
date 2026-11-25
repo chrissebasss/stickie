@@ -51,6 +51,11 @@ describe('loginItem', () => {
     expect(entry).toContain('X-GNOME-Autostart-enabled=true')
   })
 
+  it('escapes desktop-entry special characters in the Exec path', () => {
+    const entry = buildAutostartDesktopEntry('/opt/a"b\\c%d/Stickie.AppImage')
+    expect(entry).toContain('Exec="/opt/a\\"b\\\\c%%d/Stickie.AppImage"')
+  })
+
   it('calls app.setLoginItemSettings on Windows', () => {
     Object.defineProperty(process, 'platform', { value: 'win32' })
     applyLoginItem(true)

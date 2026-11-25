@@ -65,7 +65,7 @@ describe('updater wrapper', () => {
       appMock.isPackaged = true
       const result = await checkForUpdates()
 
-      expect(result).toMatchObject({ error: true, hasUpdate: false })
+      expect(result).toMatchObject({ error: true, hasUpdate: false, manualOnly: true })
       expect(result.releaseUrl).toBe('https://github.com/chrissebasss/stickie/releases/latest')
       expect(updaterMock.checkForUpdates).not.toHaveBeenCalled()
     } finally {

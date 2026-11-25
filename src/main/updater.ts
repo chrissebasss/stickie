@@ -7,14 +7,15 @@ const FALLBACK_RELEASE_URL = 'https://github.com/chrissebasss/stickie/releases/l
 
 let progressHandler: ((percent: number) => void) | undefined
 
-function errorResult(): UpdateCheckResult {
+function errorResult(manualOnly = false): UpdateCheckResult {
   const currentVersion = app.getVersion()
   return {
     currentVersion,
     latestVersion: currentVersion,
     hasUpdate: false,
     releaseUrl: FALLBACK_RELEASE_URL,
-    error: true
+    error: true,
+    manualOnly
   }
 }
 
@@ -28,7 +29,8 @@ export function configureUpdater(): void {
 
 export async function checkForUpdates(): Promise<UpdateCheckResult> {
   // No latest-mac.yml is published; mac checks would always fail, so the UI offers the manual release link.
-  if (process.platform === 'darwin' || !app.isPackaged) return errorResult()
+  if (process.platform === 'darwin') return errorResult(true)
+  if (!app.isPackaged) return errorResult()
   try {
     const result = await autoUpdater.checkForUpdates()
     return mapUpdateInfo(result?.updateInfo, app.getVersion(), FALLBACK_RELEASE_URL)

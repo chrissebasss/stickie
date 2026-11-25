@@ -24,7 +24,6 @@ export const IPC_CHANNELS = {
   NOTES_LIST: 'notes:list',
   NOTES_OPEN: 'notes:open',
   NOTES_CLOSE_ALL: 'notes:close-all',
-  NOTES_RESTORE: 'notes:restore',
 
   // Settings & Theme
   SETTINGS_GET: 'settings:get',
@@ -48,7 +47,6 @@ export const IPC_CHANNELS = {
   // Push events (Main -> Renderer)
   EVENT_INDEX_UPDATED: 'event:index-updated',
   EVENT_THEME_CHANGED: 'event:theme-changed',
-  EVENT_NOTE_UPDATED: 'event:note-updated',
   EVENT_SETTINGS_CHANGED: 'event:settings-changed',
   EVENT_UPDATE_PROGRESS: 'event:update-progress'
 } as const
@@ -77,7 +75,6 @@ export interface StickieAPI {
   onThemeChanged: (callback: (theme: { mode: ThemeMode; resolved: ResolvedTheme }) => void) => () => void
   onSettingsChanged: (callback: (settings: Settings) => void) => () => void
   onIndexUpdated: (callback: (items: NoteIndexItem[]) => void) => () => void
-  onNoteUpdated: (callback: (note: Note) => void) => () => void
 
   // Assets
   pickImage: (noteId: string) => Promise<string | null>
