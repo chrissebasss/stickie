@@ -44,6 +44,13 @@
     "fontMono": "Mono",
     "reopenOnLaunch": "Reopen open notes on launch",
     "launchAtLogin": "Launch at login",
+    "updates": "Updates",
+    "checkForUpdates": "Check for updates",
+    "checkingUpdates": "Checking...",
+    "upToDate": "Up to date (v{version})",
+    "updateAvailable": "Update available: v{version}",
+    "downloadUpdate": "Download",
+    "updateCheckFailed": "Could not check for updates",
     "done": "Done"
   },
   "deleteModal": {

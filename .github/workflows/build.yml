@@ -3,8 +3,13 @@ name: Build & Package
 on:
   push:
     branches: [ master, main ]
+    tags: [ 'v*' ]
   pull_request:
     branches: [ master, main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
 
 jobs:
   test-and-package:
@@ -14,7 +19,7 @@ jobs:
         include:
           - os: ubuntu-latest
             platform: linux
-            builder-args: --linux AppImage deb
+            builder-args: --linux AppImage deb rpm
           - os: windows-latest
             platform: win
             builder-args: --win nsis
@@ -48,10 +53,21 @@ jobs:
       - name: Build frontend & main process
         run: pnpm run build
 
+      - name: Install Linux packaging tools (rpm)
+        if: matrix.platform == 'linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm
+
       - name: Package installer
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-        run: pnpm exec electron-builder ${{ matrix.builder-args }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            pnpm exec electron-builder ${{ matrix.builder-args }} --publish always
+          else
+            pnpm exec electron-builder ${{ matrix.builder-args }} --publish never
+          fi
+        shell: bash
 
       - name: Upload packaging artifacts
         uses: actions/upload-artifact@v7
@@ -61,4 +77,4 @@ jobs:
             dist/*.exe
             dist/*.AppImage
             dist/*.deb
-
+            dist/*.rpm

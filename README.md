@@ -11,7 +11,7 @@
 - 🎨 **Themes & colors:** Preset note colors (yellow, green, blue, pink) or custom hex colors with automatic WCAG text contrast, plus system/light/dark UI themes and font switching (`System`, `Sans`, `Serif`, `Mono`).
 - 🔍 **Manager window:** Live search with match highlighting, sort by updated date, created date, or title, and import/export (`.txt`, `.md`, `.html`, `.json`).
 - 💾 **Safe storage:** Atomic writes (`.tmp` with `fsync`, rename, and `.bak` fallback) and flush on exit.
-- 🖥️ **Desktop integration:** Multi-monitor bounds safety, optional reopen-notes-on-launch, optional launch-at-login, and system tray controls.
+- 🖥️ **Desktop integration:** Multi-monitor bounds safety, optional reopen-notes-on-launch, optional launch-at-login, GitHub update checks, and system tray controls.
 
 ## Install and Run
 

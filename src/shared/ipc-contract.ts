@@ -7,6 +7,7 @@ import type {
   Bounds,
   NoteColor
 } from './types'
+import type { UpdateCheckResult } from './version'
 
 export const IPC_CHANNELS = {
   // Notes
@@ -37,6 +38,10 @@ export const IPC_CHANNELS = {
   // Import / Export
   IMPORT_FILES: 'import:files',
   EXPORT_NOTE: 'export:note',
+
+  // App
+  APP_CHECK_UPDATES: 'app:check-updates',
+  APP_OPEN_EXTERNAL: 'app:open-external',
 
   // Push events (Main -> Renderer)
   EVENT_INDEX_UPDATED: 'event:index-updated',
@@ -78,5 +83,9 @@ export interface StickieAPI {
   // Import & Export
   importFiles: () => Promise<string[]>
   exportNote: (noteId: string, format: 'json' | 'md') => Promise<boolean>
+
+  // App
+  checkForUpdates: () => Promise<UpdateCheckResult>
+  openExternal: (url: string) => Promise<void>
 }
 

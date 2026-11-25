@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { X, Sun, Moon, Laptop, Languages, Type } from 'lucide-vue-next'
+import { X, Sun, Moon, Laptop, Languages, Type, RefreshCw } from 'lucide-vue-next'
 import type { Settings, ThemeMode, LanguageMode, FontMode } from '../../../shared/types'
+import type { UpdateCheckResult } from '../../../shared/version'
 
 const props = defineProps<{
   settings: Settings
@@ -14,6 +15,25 @@ const emit = defineEmits<{
 }>()
 
 const { t } = useI18n()
+
+const checkingUpdates = ref(false)
+const updateStatus = ref<UpdateCheckResult | null>(null)
+
+async function checkUpdates() {
+  if (!window.stickie || checkingUpdates.value) return
+  checkingUpdates.value = true
+  try {
+    updateStatus.value = await window.stickie.checkForUpdates()
+  } finally {
+    checkingUpdates.value = false
+  }
+}
+
+function openRelease() {
+  if (updateStatus.value?.releaseUrl) {
+    window.stickie?.openExternal(updateStatus.value.releaseUrl)
+  }
+}
 
 function setTheme(theme: ThemeMode) {
   emit('update', { theme })
@@ -193,6 +213,37 @@ function toggleLogin(event: Event) {
             @change="toggleLogin"
           />
         </label>
+      </div>
+
+      <!-- Updates -->
+      <div class="pt-2 border-t border-stone-100 dark:border-stone-700/50 space-y-2">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ t('settings.updates') }}</span>
+          <button
+            class="inline-flex items-center space-x-1.5 px-2.5 py-1 text-xs font-medium rounded-lg border border-stone-200 dark:border-stone-700 hover:bg-stone-50 dark:hover:bg-stone-700/50 text-stone-700 dark:text-stone-200 disabled:opacity-50"
+            :disabled="checkingUpdates"
+            @click="checkUpdates"
+          >
+            <RefreshCw class="w-3.5 h-3.5" :class="{ 'animate-spin': checkingUpdates }" />
+            <span>{{ checkingUpdates ? t('settings.checkingUpdates') : t('settings.checkForUpdates') }}</span>
+          </button>
+        </div>
+
+        <div v-if="updateStatus" class="text-[11px] flex items-center justify-between text-stone-600 dark:text-stone-400">
+          <span v-if="updateStatus.error">{{ t('settings.updateCheckFailed') }}</span>
+          <span v-else-if="updateStatus.hasUpdate" class="text-amber-700 dark:text-amber-300 font-medium">
+            {{ t('settings.updateAvailable', { version: updateStatus.latestVersion }) }}
+          </span>
+          <span v-else>{{ t('settings.upToDate', { version: updateStatus.currentVersion }) }}</span>
+
+          <button
+            v-if="updateStatus.hasUpdate"
+            class="text-blue-600 dark:text-blue-400 hover:underline font-medium"
+            @click="openRelease"
+          >
+            {{ t('settings.downloadUpdate') }}
+          </button>
+        </div>
       </div>
 
       <div class="pt-2 flex justify-end">

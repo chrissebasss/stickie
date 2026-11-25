@@ -44,6 +44,13 @@
     "fontMono": "Mono",
     "reopenOnLaunch": "Gjenåpne åpne notater ved oppstart",
     "launchAtLogin": "Start automatisk ved pålogging",
+    "updates": "Oppdateringer",
+    "checkForUpdates": "Se etter oppdateringer",
+    "checkingUpdates": "Sjekker...",
+    "upToDate": "Oppdatert (v{version})",
+    "updateAvailable": "Oppdatering tilgjengelig: v{version}",
+    "downloadUpdate": "Last ned",
+    "updateCheckFailed": "Kunne ikke se etter oppdateringer",
     "done": "Ferdig"
   },
   "deleteModal": {

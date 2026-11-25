@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
 import { useI18n } from 'vue-i18n'
-import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload } from 'lucide-vue-next'
+import { Plus, XCircle, Settings as SettingsIcon, StickyNote, Upload, Download, X } from 'lucide-vue-next'
 import SearchBar from './components/SearchBar.vue'
 import NoteCard from './components/NoteCard.vue'
 import DeleteConfirmModal from './components/DeleteConfirmModal.vue'
@@ -10,6 +10,7 @@ import CustomSelect from './components/CustomSelect.vue'
 import { setAppLanguage } from '../i18n'
 import { applyFont } from '../../shared/font'
 import type { NoteIndexItem, Settings } from '../../shared/types'
+import type { UpdateCheckResult } from '../../shared/version'
 import stickieIcon from '../assets/icon.png'
 
 const { t } = useI18n()
@@ -29,6 +30,8 @@ const sortOptions = computed<
 const isDark = ref(false)
 const showSettings = ref(false)
 const noteToDelete = ref<NoteIndexItem | null>(null)
+const updateInfo = ref<UpdateCheckResult | null>(null)
+const updateDismissed = ref(false)
 
 const settings = ref<Settings>({
   schemaVersion: 1,
@@ -63,6 +66,12 @@ onMounted(async () => {
       isDark.value = t.resolved === 'dark'
       document.documentElement.setAttribute('data-theme', t.resolved)
     })
+
+    window.stickie.checkForUpdates().then((res) => {
+      if (res.hasUpdate) {
+        updateInfo.value = res
+      }
+    }).catch(() => {})
   }
 })
 
@@ -148,6 +157,10 @@ async function exportNote(note: NoteIndexItem) {
     await window.stickie.exportNote(note.id, 'md')
   }
 }
+
+function openExternal(url: string) {
+  window.stickie?.openExternal(url)
+}
 </script>
 
 <template>
@@ -204,6 +217,30 @@ async function exportNote(note: NoteIndexItem) {
         </button>
       </div>
     </header>
+
+    <!-- Update Available Banner -->
+    <div
+      v-if="updateInfo?.hasUpdate && !updateDismissed"
+      class="px-6 py-2 bg-yellow-100 dark:bg-yellow-950/60 border-b border-yellow-300 dark:border-yellow-700/60 flex items-center justify-between text-xs text-stone-900 dark:text-yellow-100"
+    >
+      <span>{{ t('settings.updateAvailable', { version: updateInfo.latestVersion }) }}</span>
+      <div class="flex items-center space-x-2">
+        <button
+          class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-yellow-300 hover:bg-yellow-400 text-stone-900 font-medium transition-colors"
+          @click="openExternal(updateInfo.releaseUrl)"
+        >
+          <Download class="w-3.5 h-3.5" />
+          <span>{{ t('settings.downloadUpdate') }}</span>
+        </button>
+        <button
+          class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10"
+          aria-label="Dismiss update"
+          @click="updateDismissed = true"
+        >
+          <X class="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
 
     <!-- Subheader with Search and Sort -->
     <div class="px-6 py-3 border-b border-stone-200 dark:border-stone-700/50 bg-stone-50/50 dark:bg-stone-900/50 flex items-center justify-between gap-4">

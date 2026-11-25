@@ -1,4 +1,4 @@
-import { ipcMain, nativeTheme, BrowserWindow, dialog, net } from 'electron'
+import { ipcMain, nativeTheme, BrowserWindow, dialog, net, app, shell } from 'electron'
 import { v4 as uuidv4 } from 'uuid'
 import { IPC_CHANNELS } from '../shared/ipc-contract'
 import type {
@@ -15,6 +15,11 @@ import type { WindowManager } from './windows/windowManager'
 import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
+import { isNewerVersion, type UpdateCheckResult } from '../shared/version'
+
+const GITHUB_PACKAGE_JSON_URL =
+  'https://raw.githubusercontent.com/chrissebasss/stickie/master/package.json'
+const GITHUB_RELEASES_URL = 'https://github.com/chrissebasss/stickie/releases/latest'
 
 function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
   if (!prev) return true
@@ -260,6 +265,47 @@ export function registerIpcHandlers(
       return exportNoteToFile(noteStore, noteId, format)
     }
   )
+
+  // 16. App: Check for updates & open external release link
+  ipcMain.handle(IPC_CHANNELS.APP_CHECK_UPDATES, async (): Promise<UpdateCheckResult> => {
+    const currentVersion = app.getVersion()
+    try {
+      const response = await net.fetch(GITHUB_PACKAGE_JSON_URL, {
+        headers: { 'Cache-Control': 'no-cache' }
+      })
+      if (!response.ok) {
+        return {
+          currentVersion,
+          latestVersion: currentVersion,
+          hasUpdate: false,
+          releaseUrl: GITHUB_RELEASES_URL,
+          error: true
+        }
+      }
+      const pkg = (await response.json()) as { version?: string }
+      const latestVersion = typeof pkg.version === 'string' ? pkg.version : currentVersion
+      return {
+        currentVersion,
+        latestVersion,
+        hasUpdate: isNewerVersion(latestVersion, currentVersion),
+        releaseUrl: GITHUB_RELEASES_URL
+      }
+    } catch {
+      return {
+        currentVersion,
+        latestVersion: currentVersion,
+        hasUpdate: false,
+        releaseUrl: GITHUB_RELEASES_URL,
+        error: true
+      }
+    }
+  })
+
+  ipcMain.handle(IPC_CHANNELS.APP_OPEN_EXTERNAL, async (_, url: string): Promise<void> => {
+    if (typeof url === 'string' && url.startsWith('https://github.com/chrissebasss/stickie/')) {
+      await shell.openExternal(url)
+    }
+  })
 
   // Sync index changes across all open windows
   noteStore.onIndexChange((items) => {

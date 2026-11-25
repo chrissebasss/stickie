@@ -1,5 +1,9 @@
 appId: com.stickie.app
 productName: Stickie
+publish:
+  provider: github
+  owner: chrissebasss
+  repo: stickie
 directories:
   output: dist
   buildResources: resources
@@ -34,6 +38,9 @@ linux:
       arch:
         - x64
     - target: deb
+      arch:
+        - x64
+    - target: rpm
       arch:
         - x64
   icon: resources/icons/icon.png

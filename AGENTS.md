@@ -4,7 +4,7 @@ Instructions for AI agents working in Stickie.
 
 ## Stack and Architecture
 
-- **Shell & Build:** Electron 45, `electron-vite`, `electron-builder` 26 (`NSIS` on Windows, `AppImage`/`deb` on Linux).
+- **Shell & Build:** Electron 45, `electron-vite`, `electron-builder` 26 (`NSIS` on Windows, `AppImage`/`deb`/`rpm` on Linux).
 - **UI & State:** Vue 3 (`<script setup>`), TypeScript strict, Pinia, Tailwind CSS, `lucide-vue-next` SVG icons, `vue-i18n` (`en`, `nb`), TipTap 3 (`StarterKit` includes `Underline`; `TextStyle` and `Table` use named imports).
 - **Testing:** Vitest (`pnpm run test`) and TypeScript (`pnpm run typecheck`).
 - **Process boundaries:** `src/main/` (Node/Electron), `src/preload/` (`contextBridge` exposing `window.stickie`), `src/shared/` (pure logic and `ipc-contract.ts`), `src/renderer/` (`manager` and `note` Vue apps). Keep `contextIsolation: true`, `nodeIntegration: false`, and `sandbox: true`.

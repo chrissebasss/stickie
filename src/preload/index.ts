@@ -87,7 +87,10 @@ const api: StickieAPI = {
 
   importFiles: () => ipcRenderer.invoke(IPC_CHANNELS.IMPORT_FILES),
   exportNote: (noteId: string, format: 'json' | 'md') =>
-    ipcRenderer.invoke(IPC_CHANNELS.EXPORT_NOTE, noteId, format)
+    ipcRenderer.invoke(IPC_CHANNELS.EXPORT_NOTE, noteId, format),
+
+  checkForUpdates: () => ipcRenderer.invoke(IPC_CHANNELS.APP_CHECK_UPDATES),
+  openExternal: (url: string) => ipcRenderer.invoke(IPC_CHANNELS.APP_OPEN_EXTERNAL, url)
 }
 
 contextBridge.exposeInMainWorld('stickie', api)
