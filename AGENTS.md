@@ -23,6 +23,10 @@ Why: Stickie is window-management heavy (many frameless windows, saved bounds, t
 
 Package manager: `pnpm` (or `npm` if pnpm is unavailable). Keep dependencies minimal; justify any addition beyond this table in the PR/commit message.
 
+- `pnpm-workspace.yaml` manages `allowBuilds` (`electron`, `esbuild` enabled; `electron-winstaller` disabled) and a temporary `minimatch@>=7.0.0 <11.0.1` override until `electron-builder` and `vue-tsc` update upstream. Run `./scripts/check-minimatch-override.sh` to check if the override can be removed.
+- `electron-builder` v26 uses `linux.desktop.entry` in `electron-builder.yml`. Use `pnpm run build:appimage` or `./scripts/install-linux.sh` to build/install the Linux AppImage with desktop entry and icons.
+- TipTap v3 `StarterKit` includes `Underline` (do not install `@tiptap/extension-underline` separately), and `TextStyle` / `Table` use named imports.
+
 ---
 
 ## 2. Architecture

@@ -95,6 +95,15 @@ Works on CachyOS, Arch, Ubuntu, Fedora, and any standard Linux desktop (KDE, GNO
 ./scripts/install-linux.sh --uninstall
 ```
 
+### Dependency & Security Checks
+```bash
+# Audit dependencies
+pnpm audit
+
+# Check whether the minimatch override in pnpm-workspace.yaml is still needed
+./scripts/check-minimatch-override.sh
+```
+
 ---
 
 ## Platform Notes & Gotchas
