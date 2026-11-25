@@ -17,6 +17,7 @@ export const DEFAULT_SETTINGS: Settings = {
 export class SettingsStore {
   private baseDir: string
   private cachedSettings: Settings | null = null
+  private writeQueue: Promise<void> = Promise.resolve()
 
   constructor(baseDir: string) {
     this.baseDir = baseDir
@@ -45,7 +46,12 @@ export class SettingsStore {
 
   public async save(settings: Settings): Promise<void> {
     this.cachedSettings = { ...settings }
-    await writeAtomic(this.settingsFilePath, JSON.stringify(settings, null, 2))
+    const snapshot = { ...settings }
+    this.writeQueue = this.writeQueue.then(
+      () => writeAtomic(this.settingsFilePath, JSON.stringify(snapshot, null, 2)),
+      () => writeAtomic(this.settingsFilePath, JSON.stringify(snapshot, null, 2))
+    )
+    await this.writeQueue
   }
 
   public async update(patch: Partial<Settings>): Promise<Settings> {
@@ -57,6 +63,10 @@ export class SettingsStore {
     }
     await this.save(updated)
     return { ...updated }
+  }
+
+  public async flush(): Promise<void> {
+    await this.writeQueue
   }
 
   public getCached(): Settings {

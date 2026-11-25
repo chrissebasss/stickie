@@ -12,6 +12,11 @@ export class WindowManager {
   private noteStore: NoteStore
   private settingsStore: SettingsStore
   private lastCascadeOffset = 0
+  private isQuitting = false
+
+  public setQuitting(quitting: boolean): void {
+    this.isQuitting = quitting
+  }
 
   constructor(noteStore: NoteStore, settingsStore: SettingsStore) {
     this.noteStore = noteStore
@@ -37,7 +42,11 @@ export class WindowManager {
     return Array.from(this.noteWindows.keys())
   }
 
-  public async openNote(noteId: string, customBounds?: Bounds): Promise<BrowserWindow> {
+  public async openNote(
+    noteId: string,
+    customBounds?: Bounds,
+    options?: { skipSync?: boolean }
+  ): Promise<BrowserWindow> {
     const existing = this.noteWindows.get(noteId)
     if (existing && !existing.isDestroyed()) {
       if (existing.isMinimized()) existing.restore()
@@ -125,7 +134,9 @@ export class WindowManager {
       if (boundsDebounce) clearTimeout(boundsDebounce)
       this.noteWindows.delete(noteId)
       this.noteStore.setOpenStatus(noteId, false)
-      this.syncOpenNoteIdsToSettings()
+      if (!this.isQuitting) {
+        this.syncOpenNoteIdsToSettings()
+      }
     })
 
     const devUrl = process.env.ELECTRON_RENDERER_URL
@@ -152,7 +163,9 @@ export class WindowManager {
       }
     }
 
-    this.syncOpenNoteIdsToSettings()
+    if (!options?.skipSync) {
+      this.syncOpenNoteIdsToSettings()
+    }
     return win
   }
 
@@ -244,7 +257,7 @@ export class WindowManager {
     return this.calculateNewNoteBounds(null)
   }
 
-  private syncOpenNoteIdsToSettings(): void {
+  public syncOpenNoteIdsToSettings(): void {
     const openIds = this.getOpenNoteIds()
     this.settingsStore.update({ openNoteIds: openIds }).catch((err) => {
       console.warn('[WindowManager] Error updating openNoteIds in settings:', err)

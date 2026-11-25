@@ -14,6 +14,7 @@ import type { SettingsStore } from './store/settingsStore'
 import type { WindowManager } from './windows/windowManager'
 import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
+import { applyLoginItem } from './loginItem'
 
 export function registerIpcHandlers(
   noteStore: NoteStore,
@@ -177,6 +178,9 @@ export function registerIpcHandlers(
       const updated = await settingsStore.update(patch)
       if (patch.theme) {
         applyTheme(patch.theme)
+      }
+      if (patch.launchAtLogin !== undefined) {
+        applyLoginItem(patch.launchAtLogin)
       }
       return updated
     }

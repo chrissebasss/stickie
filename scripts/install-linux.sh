@@ -182,6 +182,26 @@ else
 fi
 
 echo "Installing ${APP_NAME} from ${APPIMAGE_SRC}..."
+
+stop_running_stickie() {
+  local pids=""
+  if command -v pgrep >/dev/null 2>&1; then
+    pids="$(pgrep -f -- "$APPIMAGE_DEST" 2>/dev/null || true)"
+  fi
+  if [[ -n "$pids" ]]; then
+    echo "Stopping running ${APP_NAME} instance(s)..."
+    $SUDO kill -TERM $pids 2>/dev/null || true
+    for _ in 1 2 3 4 5 6; do
+      if ! pgrep -f -- "$APPIMAGE_DEST" >/dev/null 2>&1; then
+        return 0
+      fi
+      sleep 0.5
+    done
+    $SUDO kill -KILL $pids 2>/dev/null || true
+  fi
+}
+
+stop_running_stickie
 $SUDO mkdir -p "$APP_DIR" "$BIN_DIR" "$APPLICATIONS_DIR"
 
 $SUDO install -m 0755 "$APPIMAGE_SRC" "$APPIMAGE_DEST"

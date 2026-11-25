@@ -10,6 +10,7 @@ import { registerIpcHandlers, applyTheme } from './ipc'
 import { setupDisplayListeners } from './displays'
 import { getAssetDiskPath } from './store/assets'
 import { setupTray, getTray, destroyTray } from './tray'
+import { applyLoginItem } from './loginItem'
 
 // Register custom protocol scheme as privileged before app is ready
 protocol.registerSchemesAsPrivileged([
@@ -69,6 +70,7 @@ app.whenReady().then(async () => {
   await noteStore.init()
   const settings = await settingsStore.load()
   applyTheme(settings.theme)
+  applyLoginItem(settings.launchAtLogin)
 
   // Register application edit menu so standard keyboard shortcuts (Ctrl+C, Ctrl+V, etc.)
   // work natively across all windows, including frameless sticky notes.
@@ -122,6 +124,7 @@ app.whenReady().then(async () => {
     } else {
       if (windowManager.getOpenNoteIds().length === 0) {
         isQuitting = true
+        windowManager.setQuitting(true)
         app.quit()
       } else {
         mgr.hide()
@@ -170,6 +173,7 @@ app.whenReady().then(async () => {
     },
     onQuit: async () => {
       isQuitting = true
+      windowManager.setQuitting(true)
       destroyTray()
       await flushAndExit()
       app.exit(0)
@@ -178,9 +182,14 @@ app.whenReady().then(async () => {
 
   // Optionally reopen notes that were open at last exit (default false)
   if (settings.reopenNotesOnLaunch && settings.openNoteIds.length > 0) {
-    for (const noteId of settings.openNoteIds) {
-      await windowManager.openNote(noteId)
+    const idsToReopen = [...settings.openNoteIds]
+    for (const noteId of idsToReopen) {
+      const note = await noteStore.getNote(noteId)
+      if (note) {
+        await windowManager.openNote(noteId, undefined, { skipSync: true })
+      }
     }
+    windowManager.syncOpenNoteIdsToSettings()
   }
 
   app.on('second-instance', () => {
@@ -208,8 +217,10 @@ let hasFlushed = false
 const flushAndExit = async () => {
   if (hasFlushed) return
   hasFlushed = true
+  windowManager.setQuitting(true)
   try {
     await noteStore.flush()
+    await settingsStore.flush()
   } catch (err) {
     console.error('[App] Error during exit flush:', err)
   }
@@ -218,6 +229,7 @@ const flushAndExit = async () => {
 app.on('before-quit', (e) => {
   if (!isQuitting) {
     isQuitting = true
+    windowManager.setQuitting(true)
     e.preventDefault()
     destroyTray()
     flushAndExit().finally(() => {

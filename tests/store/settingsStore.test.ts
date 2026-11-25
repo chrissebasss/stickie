@@ -54,5 +54,18 @@ describe('SettingsStore', () => {
     const loaded = await newStore.load()
     expect(loaded.theme).toBe('light')
   })
+
+  it('serializes concurrent updates and flushes cleanly', async () => {
+    await Promise.all([
+      store.update({ openNoteIds: ['n1'] }),
+      store.update({ openNoteIds: ['n1', 'n2'] }),
+      store.update({ reopenNotesOnLaunch: true })
+    ])
+    await store.flush()
+
+    const reloaded = await new SettingsStore(testDir).load()
+    expect(reloaded.openNoteIds).toEqual(['n1', 'n2'])
+    expect(reloaded.reopenNotesOnLaunch).toBe(true)
+  })
 })
 
