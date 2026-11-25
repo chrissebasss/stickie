@@ -29,6 +29,7 @@ Apply these skills automatically without waiting for the user to invoke them:
 - **`ponytail-audit` / `ponytail-review`**: Use when auditing the codebase or reviewing diffs.
 - **`security-audit`**: Use when triaging `pnpm audit` advisories or reviewing trust boundaries.
 - **`humanizer`**: Use whenever writing or updating documentation (`README.md`, `AGENTS.md`).
+- **Verification:** The agent runs typecheck, tests, build and syntax checks itself and reports the results. Do not ask the user to run commands the agent can run; only ask for checks that need a live GUI, another machine, or an external side effect.
 
 ## Documentation Maintenance
 
