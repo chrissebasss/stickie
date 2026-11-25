@@ -269,7 +269,13 @@ const flushAndExit = async (): Promise<void> => {
 }
 
 app.on('before-quit', (e) => {
-  if (shouldBypassQuitGuard(isInstallingUpdate)) return
+  if (shouldBypassQuitGuard(isInstallingUpdate)) {
+    // The updater owns this quit; window close handlers must not veto it.
+    isQuitting = true
+    windowManager.setQuitting(true)
+    destroyTray()
+    return
+  }
   if (!isQuitting) {
     isQuitting = true
     windowManager.setQuitting(true)
