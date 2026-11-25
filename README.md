@@ -77,5 +77,5 @@ Attach `latest.yml` and `latest-linux.yml` to every release so the in-app update
 
 ## Linux Notes
 
-- **Wayland positioning:** By default on Linux, Stickie relaunches with `--ozone-platform=x11` and hardware acceleration disabled so XWayland preserves per-window `(x, y)` coordinates across restarts. Set `STICKIE_OZONE=wayland` to run natively on Wayland.
+- **Wayland positioning:** Packaged Linux builds relaunch with `--ozone-platform=x11` and hardware acceleration disabled so XWayland preserves per-window `(x, y)` coordinates across restarts. Development builds skip this relaunch. Set `STICKIE_OZONE=wayland` to run natively on Wayland.
 - **System tray:** Works out of the box on KDE Plasma and XFCE. On GNOME, install the AppIndicator and KStatusNotifierItem Support extension.

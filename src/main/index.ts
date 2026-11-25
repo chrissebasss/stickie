@@ -38,7 +38,7 @@ if (process.platform === 'win32') {
 // Relaunch with real argv before single-instance lock so Chromium's browser process initializes Ozone as x11.
 if (process.platform === 'linux') {
   const ozonePlatform = process.env.STICKIE_OZONE || 'x11'
-  if (ozonePlatform === 'x11' && process.env.WAYLAND_DISPLAY && process.env.DISPLAY) {
+  if (app.isPackaged && ozonePlatform === 'x11' && process.env.WAYLAND_DISPLAY && process.env.DISPLAY) {
     const hasSwitch = process.argv.some(
       (a) => a === '--ozone-platform' || a.startsWith('--ozone-platform=')
     )
