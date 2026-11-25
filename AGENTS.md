@@ -4,7 +4,7 @@ Instructions for AI agents working in Stickie.
 
 ## Stack and Architecture
 
-- **Shell & Build:** Electron 45, `electron-vite`, `electron-builder` 26 (`NSIS` on Windows, `AppImage`/`deb`/`rpm` on Linux).
+- **Shell & Build:** Node.js 24+ (26 used locally, 24 in CI), Electron 45, `electron-vite`, `electron-builder` 26 (`NSIS` on Windows, `AppImage`/`deb`/`rpm` on Linux).
 - **UI & State:** Vue 3 (`<script setup>`), TypeScript strict, Pinia, Tailwind CSS, `lucide-vue-next` SVG icons, `vue-i18n` (`en`, `nb`), TipTap 3 (`StarterKit` includes `Underline`; `TextStyle` and `Table` use named imports).
 - **Testing:** Vitest (`pnpm run test`) and TypeScript (`pnpm run typecheck`).
 - **Process boundaries:** `src/main/` (Node/Electron), `src/preload/` (`contextBridge` exposing `window.stickie`), `src/shared/` (pure logic and `ipc-contract.ts`), `src/renderer/` (`manager` and `note` Vue apps). Keep `contextIsolation: true`, `nodeIntegration: false`, and `sandbox: true`.
@@ -16,6 +16,7 @@ Instructions for AI agents working in Stickie.
 - **Login item:** `src/main/loginItem.ts` uses `app.setLoginItemSettings` on Windows/macOS and `$XDG_CONFIG_HOME/autostart/stickie.desktop` on Linux (preferring `$APPIMAGE` over `process.execPath`).
 - **Package management:** `pnpm-workspace.yaml` manages `allowBuilds` (`electron`, `esbuild` true; `electron-winstaller` false) and a temporary `minimatch@>=7.0.0 <11.0.1` override. Run `./scripts/check-minimatch-override.sh` to check if the override can be removed.
 - **Packaging config:** `electron-builder` 26 uses `linux.desktop.entry` in `electron-builder.yml`. Use `./scripts/install-linux.sh` to build and install the Linux AppImage, launcher, desktop entry, and icons.
+- **Releases:** `./scripts/release.sh` builds Linux and Windows installers locally and publishes a `v<version>` GitHub release with notes from commits since the last tag. `--dry-run` prints the steps without publishing. The Actions workflow runs only on manual dispatch. macOS builds need a Mac.
 
 ## Skills Workflow
 

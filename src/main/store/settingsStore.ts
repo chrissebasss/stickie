@@ -67,7 +67,13 @@ export class SettingsStore {
   }
 
   public async flush(): Promise<void> {
-    await this.writeQueue
+    // Re-check the queue: a write can be appended while an earlier one is awaited.
+    let queued = this.writeQueue
+    while (true) {
+      await queued
+      if (this.writeQueue === queued) return
+      queued = this.writeQueue
+    }
   }
 
   public getCached(): Settings {

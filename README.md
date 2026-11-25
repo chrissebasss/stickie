@@ -31,13 +31,23 @@ To start Stickie:
 
 Build the installer with `pnpm run build:win`, run the generated NSIS `.exe` in `dist/`, then open **Stickie** from the Start Menu or Desktop shortcut.
 
-### 🍎 macOS
+### macOS
 
-Run from source with `pnpm install && pnpm run dev` (or package with `electron-builder` on macOS), then open **Stickie** from Applications or Spotlight.
+The GitHub release has no macOS installer. Build one on a Mac:
+
+```bash
+pnpm install
+pnpm run build
+pnpm exec electron-builder --mac dmg
+```
+
+Open the `.dmg` in `dist/`, drag Stickie to Applications, and start it from Applications or Spotlight. The app is unsigned, so macOS may block the first launch. Use right-click → Open, or allow it under System Settings → Privacy & Security.
+
+You need Node.js 24 or newer, pnpm and a Mac. A signed and notarized build also needs an Apple Developer account and a macOS build machine. For development without installing, use `pnpm install && pnpm run dev`.
 
 ## Development
 
-Prerequisites: Node.js 20+ and `pnpm`.
+Prerequisites: Node.js 24 or newer and pnpm. Local development uses Node.js 26; CI uses 24.
 
 ```bash
 pnpm install
@@ -54,6 +64,14 @@ pnpm run build:linux
 pnpm run build:win
 pnpm audit
 ```
+
+## Releasing
+
+`./scripts/release.sh` builds the Linux and Windows installers on this machine, then publishes them as a GitHub release tagged `v<version>` from `package.json`. It runs typecheck, tests and the build before packaging. Add `--dry-run` to print the steps without building or publishing.
+
+Release notes list the commits since the previous `v*` tag. You need `gh` installed and logged in. macOS installers need a Mac, so build those separately and attach them to the release.
+
+GitHub Actions runs only when you start it from the Actions tab. Pushes and pull requests do not start a run.
 
 ## Linux Notes
 

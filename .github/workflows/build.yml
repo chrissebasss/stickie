@@ -1,15 +1,10 @@
 name: Build & Package
 
 on:
-  push:
-    branches: [ master, main ]
-    tags: [ 'v*' ]
-  pull_request:
-    branches: [ master, main ]
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test-and-package:
@@ -60,14 +55,7 @@ jobs:
       - name: Package installer
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: false
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
-            pnpm exec electron-builder ${{ matrix.builder-args }} --publish always
-          else
-            pnpm exec electron-builder ${{ matrix.builder-args }} --publish never
-          fi
-        shell: bash
+        run: pnpm exec electron-builder ${{ matrix.builder-args }} --publish never
 
       - name: Upload packaging artifacts
         uses: actions/upload-artifact@v7

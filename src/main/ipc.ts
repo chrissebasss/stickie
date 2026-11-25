@@ -15,10 +15,10 @@ import type { WindowManager } from './windows/windowManager'
 import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
-import { isNewerVersion, type UpdateCheckResult } from '../shared/version'
+import { isNewerVersion, getLatestReleaseVersion, type UpdateCheckResult } from '../shared/version'
 
-const GITHUB_PACKAGE_JSON_URL =
-  'https://raw.githubusercontent.com/chrissebasss/stickie/master/package.json'
+const GITHUB_RELEASES_API_URL =
+  'https://api.github.com/repos/chrissebasss/stickie/releases/latest'
 const GITHUB_RELEASES_URL = 'https://github.com/chrissebasss/stickie/releases/latest'
 
 function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
@@ -270,8 +270,9 @@ export function registerIpcHandlers(
   ipcMain.handle(IPC_CHANNELS.APP_CHECK_UPDATES, async (): Promise<UpdateCheckResult> => {
     const currentVersion = app.getVersion()
     try {
-      const response = await net.fetch(GITHUB_PACKAGE_JSON_URL, {
-        headers: { 'Cache-Control': 'no-cache' }
+      const response = await net.fetch(GITHUB_RELEASES_API_URL, {
+        headers: { 'Cache-Control': 'no-cache', Accept: 'application/vnd.github+json' },
+        signal: AbortSignal.timeout(8000)
       })
       if (!response.ok) {
         return {
@@ -282,8 +283,16 @@ export function registerIpcHandlers(
           error: true
         }
       }
-      const pkg = (await response.json()) as { version?: string }
-      const latestVersion = typeof pkg.version === 'string' ? pkg.version : currentVersion
+      const latestVersion = getLatestReleaseVersion(await response.json())
+      if (!latestVersion) {
+        return {
+          currentVersion,
+          latestVersion: currentVersion,
+          hasUpdate: false,
+          releaseUrl: GITHUB_RELEASES_URL,
+          error: true
+        }
+      }
       return {
         currentVersion,
         latestVersion,

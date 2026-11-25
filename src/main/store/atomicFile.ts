@@ -25,6 +25,12 @@ export async function writeAtomic(filePath: string, data: string | Buffer): Prom
   // If primary file exists, rotate it to .bak
   try {
     await fs.copyFile(filePath, bakPath)
+    const bakHandle = await fs.open(bakPath, 'r')
+    try {
+      await bakHandle.sync()
+    } finally {
+      await bakHandle.close()
+    }
   } catch (err: unknown) {
     if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
       console.warn(`[atomicFile] Warning while creating backup for ${filePath}:`, err)
@@ -33,6 +39,16 @@ export async function writeAtomic(filePath: string, data: string | Buffer): Prom
 
   // Atomically rename .tmp over target
   await fs.rename(tmpPath, filePath)
+
+  // Flush the directory entry too; on Windows opening a directory is not supported.
+  if (process.platform !== 'win32') {
+    const dirHandle = await fs.open(dirname(filePath), 'r')
+    try {
+      await dirHandle.sync()
+    } finally {
+      await dirHandle.close()
+    }
+  }
 }
 
 /**

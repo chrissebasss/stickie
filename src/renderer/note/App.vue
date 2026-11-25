@@ -61,6 +61,7 @@ async function loadNote() {
 
     window.stickie.onSettingsChanged((updated) => {
       applyFont(updated.font)
+      if (updated.language) setAppLanguage(updated.language)
     })
 
     nextTick(() => {

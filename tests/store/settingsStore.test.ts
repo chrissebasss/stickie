@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import { promises as fs } from 'fs'
 import { join } from 'path'
 import { tmpdir } from 'os'
@@ -66,6 +66,57 @@ describe('SettingsStore', () => {
     const reloaded = await new SettingsStore(testDir).load()
     expect(reloaded.openNoteIds).toEqual(['n1', 'n2'])
     expect(reloaded.reopenNotesOnLaunch).toBe(true)
+  })
+
+  it('flush waits for settings updates queued while the flush is running', async () => {
+    await store.save(DEFAULT_SETTINGS)
+
+    const realOpen = fs.open
+    const gates: Array<() => void> = []
+    let gating = true
+    const openSpy = vi.spyOn(fs, 'open')
+    openSpy.mockImplementation(((...args: Parameters<typeof fs.open>) =>
+      gating && String(args[0]).endsWith('.tmp')
+        ? new Promise<void>((resolve) => gates.push(resolve)).then(() => realOpen(...args))
+        : realOpen(...args)) as typeof fs.open)
+
+    const waitForGate = async (count: number): Promise<void> => {
+      const deadline = Date.now() + 2000
+      while (gates.length < count && Date.now() < deadline) {
+        await new Promise((resolve) => setTimeout(resolve, 5))
+      }
+      expect(gates.length).toBeGreaterThanOrEqual(count)
+    }
+
+    const pending: Array<Promise<unknown>> = []
+    try {
+      const first = store.save({ ...DEFAULT_SETTINGS, theme: 'light' })
+      pending.push(first)
+      await waitForGate(1)
+      const flushing = store.flush()
+      pending.push(flushing)
+      const updatePromise = store.update({ theme: 'dark' })
+      pending.push(updatePromise)
+
+      gates.shift()!()
+      await waitForGate(1)
+
+      let flushDone = false
+      void flushing.then(() => { flushDone = true })
+      await new Promise((resolve) => setTimeout(resolve, 20))
+      expect(flushDone).toBe(false)
+
+      gates.shift()!()
+      await Promise.all(pending)
+    } finally {
+      gating = false
+      gates.splice(0).forEach((release) => release())
+      await Promise.allSettled(pending)
+      openSpy.mockRestore()
+    }
+
+    const raw = await fs.readFile(join(testDir, 'settings.json'), 'utf-8')
+    expect((JSON.parse(raw) as { theme: string }).theme).toBe('dark')
   })
 })
 

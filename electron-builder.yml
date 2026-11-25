@@ -33,6 +33,7 @@ nsis:
 
 linux:
   maintainer: Chris <33810969+chrissebasss@users.noreply.github.com>
+  syncDesktopName: true
   target:
     - target: AppImage
       arch:

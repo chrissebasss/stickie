@@ -250,7 +250,9 @@ describe('NoteStore', () => {
     let gate: Promise<void> | null = null
     const openSpy = vi.spyOn(fs, 'open')
     openSpy.mockImplementation(((...args: Parameters<typeof fs.open>) =>
-      gate ? gate.then(() => realOpen(...args)) : realOpen(...args)) as typeof fs.open)
+      gate && String(args[0]).endsWith('.tmp')
+        ? gate.then(() => realOpen(...args))
+        : realOpen(...args)) as typeof fs.open)
 
     let unblock = (): void => {}
     gate = new Promise<void>((resolve) => { unblock = resolve })
@@ -286,7 +288,9 @@ describe('NoteStore', () => {
     let gate: Promise<void> | null = null
     const openSpy = vi.spyOn(fs, 'open')
     openSpy.mockImplementation(((...args: Parameters<typeof fs.open>) =>
-      gate ? gate.then(() => realOpen(...args)) : realOpen(...args)) as typeof fs.open)
+      gate && String(args[0]).endsWith('.tmp')
+        ? gate.then(() => realOpen(...args))
+        : realOpen(...args)) as typeof fs.open)
 
     let unblock = (): void => {}
     gate = new Promise<void>((resolve) => { unblock = resolve })

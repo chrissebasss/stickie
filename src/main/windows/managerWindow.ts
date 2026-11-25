@@ -52,22 +52,24 @@ export function createManagerWindow(
   win.on('move', saveBounds)
   win.on('resize', saveBounds)
 
-  win.on('close', (e) => {
+  win.on('close', async (e) => {
     if (boundsDebounce) {
       clearTimeout(boundsDebounce)
       boundsDebounce = null
     }
+    let boundsSave: Promise<unknown> = Promise.resolve()
     if (!win.isDestroyed()) {
-      const bounds = win.getNormalBounds()
-      settingsStore.update({ managerBounds: bounds }).catch(console.error)
+      boundsSave = settingsStore.update({ managerBounds: win.getNormalBounds() })
     }
     if (isQuitting?.()) {
+      await boundsSave.catch(console.error)
       return
     }
     if (onCloseRequest) {
       e.preventDefault()
       onCloseRequest()
     }
+    await boundsSave.catch(console.error)
   })
 
   win.once('ready-to-show', () => {
