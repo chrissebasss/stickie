@@ -11,7 +11,7 @@
 - 🎨 **Themes & colors:** Preset note colors (yellow, green, blue, pink) or custom hex colors with automatic WCAG text contrast, plus system/light/dark UI themes and font switching (`System`, `Sans`, `Serif`, `Mono`).
 - 🔍 **Manager window:** Live search with match highlighting, sort by updated date, created date, or title, with import (`.txt`, `.md`, `.html`, `.json`) and export (`.md`, `.json`).
 - 💾 **Safe storage:** Atomic writes (`.tmp` with `fsync`, rename, and `.bak` fallback) and flush on exit.
-- 🖥️ **Desktop integration:** Multi-monitor bounds safety, optional reopen-notes-on-launch, optional launch-at-login, self-update, and system tray controls.
+- 🖥️ **Desktop integration:** Multi-monitor bounds safety, notes that can stay on top, optional reopen-notes-on-launch, optional launch-at-login, self-update, system tray controls, dates in your OS locale.
 
 ## Install and Run
 
@@ -69,11 +69,11 @@ pnpm audit
 
 `./scripts/release.sh` builds the Linux and Windows installers on this machine, then publishes them as a GitHub release tagged `v<version>` from `package.json`. It runs typecheck, tests and the build before packaging. Add `--dry-run` to print the steps without building or publishing.
 
-Release notes list the commits since the previous `v*` tag. You need `gh` installed and logged in. macOS installers need a Mac, so build those separately and attach them to the release.
+By default, release notes list commits since the previous `v*` tag. Use `--notes-file <path>` to publish hand-written notes. You need `gh` installed and logged in. macOS installers need a Mac, so build those separately and attach them to the release.
 
 GitHub Actions runs only when you start it from the Actions tab. Pushes and pull requests do not start a run.
 
-Attach `latest.yml` and `latest-linux.yml` to every release so the in-app updater can find new versions. It reads these unsigned manifests from GitHub and downloads installers from GitHub only. macOS updates are manual. Linux package updates may ask for your password.
+Attach `latest.yml` and `latest-linux.yml` to every release so the in-app updater can find new versions. It reads these unsigned manifests from GitHub and downloads installers from GitHub only. macOS updates are manual. Linux package updates may ask for your password. Windows and Linux builds are unsigned.
 
 ## Linux Notes
 

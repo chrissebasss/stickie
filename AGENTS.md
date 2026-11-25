@@ -16,7 +16,7 @@ Instructions for AI agents working in Stickie.
 - **Login item:** `src/main/loginItem.ts` uses `app.setLoginItemSettings` on Windows/macOS and `$XDG_CONFIG_HOME/autostart/stickie.desktop` on Linux (preferring `$APPIMAGE` over `process.execPath`).
 - **Package management:** `pnpm-workspace.yaml` manages `allowBuilds` (`electron`, `esbuild` true; `electron-winstaller` false) and a temporary `minimatch@>=7.0.0 <11.0.1` override. Run `./scripts/check-minimatch-override.sh` to check if the override can be removed.
 - **Packaging config:** `electron-builder` 26 uses `linux.desktop.entry` in `electron-builder.yml`. Use `./scripts/install-linux.sh` to build and install the Linux AppImage, launcher, desktop entry, and icons.
-- **Releases:** `./scripts/release.sh` builds Linux and Windows installers locally and publishes a `v<version>` GitHub release with notes from commits since the last tag. `--dry-run` prints the steps without publishing. The Actions workflow runs only on manual dispatch. macOS builds need a Mac. `latest.yml` and `latest-linux.yml` must be attached for electron-updater; Linux package updates may prompt for a password.
+- **Releases:** `./scripts/release.sh` builds Linux and Windows installers locally and publishes a `v<version>` GitHub release with notes from commits since the last tag. `--dry-run` prints the steps without publishing. Pass `--notes-file <path>` to publish hand-written notes instead of commit-derived notes. The Actions workflow runs only on manual dispatch. macOS builds need a Mac. `latest.yml` and `latest-linux.yml` must be attached for electron-updater; Linux package updates may prompt for a password.
 
 ## Skills Workflow
 

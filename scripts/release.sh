@@ -8,9 +8,27 @@ ROOT="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
 DRY_RUN=false
-if [[ "${1:-}" == "--dry-run" ]]; then
-  DRY_RUN=true
-fi
+NOTES_FILE=""
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --dry-run)
+      DRY_RUN=true
+      shift
+      ;;
+    --notes-file)
+      if [[ $# -lt 2 ]]; then
+        echo "--notes-file requires a path." >&2
+        exit 1
+      fi
+      NOTES_FILE="$2"
+      shift 2
+      ;;
+    *)
+      echo "Unknown argument: $1" >&2
+      exit 1
+      ;;
+  esac
+done
 
 VERSION="$(node -p "require('./package.json').version")"
 TAG="v${VERSION}"
@@ -40,17 +58,23 @@ if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
 fi
 
 PREV_TAG="$(git describe --tags --abbrev=0 --match 'v*' 2>/dev/null || true)"
-NOTES="$(mktemp)"
-trap 'rm -f "$NOTES"' EXIT
-{
-  printf '# Stickie %s\n\n## Changes\n\n' "$VERSION"
-  if [[ -n "$PREV_TAG" ]]; then
-    git log --no-merges --pretty=format:'- %s' "${PREV_TAG}..HEAD"
-  else
-    git log --no-merges --pretty=format:'- %s'
-  fi
-  printf '\n'
-} >"$NOTES"
+NOTES="$NOTES_FILE"
+if [[ -z "$NOTES" ]]; then
+  NOTES="$(mktemp)"
+  trap 'rm -f "$NOTES"' EXIT
+  {
+    printf '# Stickie %s\n\n## Changes\n\n' "$VERSION"
+    if [[ -n "$PREV_TAG" ]]; then
+      git log --no-merges --pretty=format:'- %s' "${PREV_TAG}..HEAD"
+    else
+      git log --no-merges --pretty=format:'- %s'
+    fi
+    printf '\n'
+  } >"$NOTES"
+elif [[ ! -f "$NOTES" ]]; then
+  echo "Notes file not found: $NOTES" >&2
+  exit 1
+fi
 
 run() {
   if $DRY_RUN; then
