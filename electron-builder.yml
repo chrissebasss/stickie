@@ -28,6 +28,7 @@ nsis:
   shortcutName: Stickie
 
 linux:
+  maintainer: Chris <33810969+chrissebasss@users.noreply.github.com>
   target:
     - target: AppImage
       arch:
