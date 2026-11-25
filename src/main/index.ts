@@ -1,4 +1,5 @@
 import { app, BrowserWindow, protocol, net, Menu, MenuItem, powerMonitor } from 'electron'
+import { spawn } from 'child_process'
 import { join } from 'path'
 import { pathToFileURL } from 'url'
 import { v4 as uuidv4 } from 'uuid'
@@ -31,10 +32,29 @@ if (process.platform === 'win32') {
   app.setAppUserModelId('com.stickie.app')
 }
 
-// Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden
+// Linux Wayland handling: default to x11 for reliable multi-window positioning unless overridden.
+// Relaunch with real argv before single-instance lock so Chromium's browser process initializes Ozone as x11.
 if (process.platform === 'linux') {
   const ozonePlatform = process.env.STICKIE_OZONE || 'x11'
-  app.commandLine.appendSwitch('ozone-platform-hint', ozonePlatform)
+  if (ozonePlatform === 'x11' && process.env.WAYLAND_DISPLAY && process.env.DISPLAY) {
+    const hasSwitch = process.argv.some(
+      (a) => a === '--ozone-platform' || a.startsWith('--ozone-platform=')
+    )
+    if (!hasSwitch && !process.env.STICKIE_RELAUNCHED) {
+      const bin = process.env.APPIMAGE || process.execPath
+      spawn(bin, ['--ozone-platform=x11', ...process.argv.slice(1)], {
+        detached: true,
+        stdio: 'ignore',
+        env: { ...process.env, STICKIE_RELAUNCHED: '1' }
+      }).unref()
+      app.exit(0)
+    }
+  }
+  if (ozonePlatform === 'x11') {
+    app.disableHardwareAcceleration()
+  } else {
+    app.commandLine.appendSwitch('ozone-platform', ozonePlatform)
+  }
 }
 
 // Single-instance lock

@@ -53,6 +53,14 @@ export function createManagerWindow(
   win.on('resize', saveBounds)
 
   win.on('close', (e) => {
+    if (boundsDebounce) {
+      clearTimeout(boundsDebounce)
+      boundsDebounce = null
+    }
+    if (!win.isDestroyed()) {
+      const bounds = win.getNormalBounds()
+      settingsStore.update({ managerBounds: bounds }).catch(console.error)
+    }
     if (isQuitting?.()) {
       return
     }
