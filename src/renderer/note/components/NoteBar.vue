@@ -82,7 +82,7 @@ function onCustomColor(event: Event) {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
         :aria-label="t('note.newNote')"
-        :title="t('note.newNote')"
+        v-tooltip="t('note.newNote')"
         @click="emit('newNote')"
       >
         <Plus class="w-3.5 h-3.5" />
@@ -93,7 +93,7 @@ function onCustomColor(event: Event) {
         <button
           class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
           :aria-label="t('note.color')"
-          :title="t('note.color')"
+          v-tooltip="t('note.color')"
           @click="showColorPicker = !showColorPicker"
         >
           <Palette class="w-3.5 h-3.5" />
@@ -135,7 +135,7 @@ function onCustomColor(event: Event) {
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
         :class="{ 'opacity-60': !showToolbar }"
         :aria-label="t('note.toggleToolbar')"
-        :title="t('note.toggleToolbar')"
+        v-tooltip="t('note.toggleToolbar')"
         @click="emit('toggleToolbar')"
       >
         <SlidersHorizontal class="w-3.5 h-3.5" />
@@ -145,7 +145,7 @@ function onCustomColor(event: Event) {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 text-note-barFg focus:outline-none focus:ring-1 focus:ring-current"
         :aria-label="alwaysOnTop ? t('note.unpin') : t('note.pin')"
-        :title="alwaysOnTop ? t('note.unpin') : t('note.pin')"
+        v-tooltip="alwaysOnTop ? t('note.unpin') : t('note.pin')"
         @click="emit('togglePin')"
       >
         <Pin v-if="!alwaysOnTop" class="w-3.5 h-3.5" />
@@ -156,7 +156,7 @@ function onCustomColor(event: Event) {
       <button
         class="p-1 rounded hover:bg-red-500 hover:text-white text-note-barFg focus:outline-none focus:ring-1 focus:ring-current transition-colors"
         :aria-label="t('note.close')"
-        :title="t('note.close')"
+        v-tooltip="t('note.close')"
         @click="emit('close')"
       >
         <X class="w-3.5 h-3.5" />

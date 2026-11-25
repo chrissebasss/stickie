@@ -81,7 +81,7 @@ onBeforeUnmount(() => {
     <!-- Custom Popover Menu -->
     <div
       v-if="isOpen"
-      class="absolute right-0 top-full mt-1.5 min-w-[140px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 shadow-xl py-1 z-50 overflow-hidden"
+      class="absolute right-0 top-full mt-1.5 min-w-[180px] rounded-lg border border-stone-200 dark:border-stone-700 bg-white dark:bg-stone-800 shadow-xl py-1 z-50 overflow-hidden"
       role="listbox"
     >
       <button
@@ -98,7 +98,7 @@ onBeforeUnmount(() => {
         "
         @click="selectOption(opt.value)"
       >
-        <span>{{ opt.label }}</span>
+        <span class="whitespace-nowrap">{{ opt.label }}</span>
         <Check
           v-if="opt.value === modelValue"
           class="w-3.5 h-3.5 ml-2 text-blue-600 dark:text-blue-400 shrink-0"

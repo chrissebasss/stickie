@@ -10,7 +10,15 @@ import type {
   NoteColor
 } from '../shared/types'
 
+function getSystemDateLocale(): string | undefined {
+  const raw = process.env.LC_ALL || process.env.LC_TIME || process.env.LANG
+  if (!raw) return undefined
+  const cleaned = raw.split('.')[0].split('@')[0].replace('_', '-')
+  return /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/.test(cleaned) ? cleaned : undefined
+}
+
 const api: StickieAPI = {
+  systemDateLocale: getSystemDateLocale(),
   getNote: (noteId: string) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_GET, noteId),
   saveNote: (note: Note) => ipcRenderer.invoke(IPC_CHANNELS.NOTE_SAVE, note),
   closeNote: (noteId: string, currentNote?: Note) =>

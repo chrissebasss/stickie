@@ -79,9 +79,9 @@ export class NoteStore {
     return result.data
   }
 
-  public queueSave(note: Note): void {
+  public queueSave(note: Note, options?: { touchUpdatedAt?: boolean }): void {
     // Recompute title and timestamps immediately for in-memory responsiveness
-    const updatedNote = this.normalizeNote(note)
+    const updatedNote = this.normalizeNote(note, options?.touchUpdatedAt ?? true)
     this.updateIndexItem(updatedNote, this.index.get(note.id)?.isOpen ?? false)
     this.notifyIndexListeners()
 
@@ -102,14 +102,14 @@ export class NoteStore {
     this.pendingSaves.set(note.id, { note: updatedNote, timer })
   }
 
-  public async saveNoteNow(note: Note): Promise<void> {
+  public async saveNoteNow(note: Note, options?: { touchUpdatedAt?: boolean }): Promise<void> {
     const existing = this.pendingSaves.get(note.id)
     if (existing) {
       clearTimeout(existing.timer)
       this.pendingSaves.delete(note.id)
     }
 
-    const updatedNote = this.normalizeNote(note)
+    const updatedNote = this.normalizeNote(note, options?.touchUpdatedAt ?? true)
     await this.writeToDisk(updatedNote)
     this.updateIndexItem(updatedNote, this.index.get(note.id)?.isOpen ?? false)
     this.notifyIndexListeners()
@@ -131,7 +131,7 @@ export class NoteStore {
     await Promise.allSettled(this.writeQueues.values())
   }
 
-  public async discardIfEmpty(note: Note): Promise<boolean> {
+  public async discardIfEmpty(note: Note, options?: { touchUpdatedAt?: boolean }): Promise<boolean> {
     // Cancel any pending write first
     const pending = this.pendingSaves.get(note.id)
     if (pending) {
@@ -145,7 +145,7 @@ export class NoteStore {
     }
 
     // If not empty, save immediately
-    await this.saveNoteNow(note)
+    await this.saveNoteNow(note, options)
     return false
   }
 
@@ -205,13 +205,13 @@ export class NoteStore {
     }
   }
 
-  private normalizeNote(note: Note): Note {
+  private normalizeNote(note: Note, touchUpdatedAt = true): Note {
     const title = deriveTitle(note.plainText)
     return {
       ...note,
       schemaVersion: 1,
       title,
-      updatedAt: Date.now()
+      updatedAt: touchUpdatedAt ? Date.now() : note.updatedAt
     }
   }
 

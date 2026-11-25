@@ -291,19 +291,3 @@ if [[ "$SYSTEM_INSTALL" == false ]]; then
       ;;
   esac
 fi
-
-if [[ "$EUID" -ne 0 && -n "${DISPLAY:-}${WAYLAND_DISPLAY:-}" ]]; then
-  LOG_FILE="${XDG_RUNTIME_DIR:-/tmp}/stickie-launch.log"
-  echo "Launching ${APP_NAME}..."
-  if command -v setsid >/dev/null 2>&1; then
-    setsid -f "$BIN_DEST" </dev/null >"$LOG_FILE" 2>&1 || true
-  else
-    nohup "$BIN_DEST" </dev/null >"$LOG_FILE" 2>&1 &
-    disown 2>/dev/null || true
-  fi
-  sleep 1
-  if [[ -z "$(find_running_stickie_pids)" ]]; then
-    echo "Warning: ${APP_NAME} did not stay running. Output from ${LOG_FILE}:" >&2
-    cat "$LOG_FILE" >&2 || true
-  fi
-fi

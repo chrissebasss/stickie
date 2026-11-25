@@ -191,5 +191,28 @@ describe('NoteStore', () => {
     const reloaded = await store.getNote('concurrent')
     expect(reloaded?.plainText).toBe('v3')
   })
+
+  it('preserves updatedAt when touchUpdatedAt is false', async () => {
+    const originalUpdatedAt = 1_700_000_000_000
+    const note: Note = {
+      schemaVersion: 1,
+      id: 'bounds-only',
+      title: 'Bounds Only',
+      createdAt: originalUpdatedAt - 10_000,
+      updatedAt: originalUpdatedAt,
+      color: { kind: 'preset', id: 'yellow' },
+      bounds: { x: 10, y: 10, width: 300, height: 300 },
+      content: { type: 'doc' },
+      plainText: 'Bounds Only'
+    }
+
+    await store.saveNoteNow(note, { touchUpdatedAt: false })
+    const afterBoundsSave = await store.getNote('bounds-only')
+    expect(afterBoundsSave?.updatedAt).toBe(originalUpdatedAt)
+
+    await store.saveNoteNow({ ...note, plainText: 'Edited' }, { touchUpdatedAt: true })
+    const afterEdit = await store.getNote('bounds-only')
+    expect(afterEdit?.updatedAt).toBeGreaterThan(originalUpdatedAt)
+  })
 })
 

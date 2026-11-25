@@ -46,6 +46,7 @@ export const IPC_CHANNELS = {
 } as const
 
 export interface StickieAPI {
+  systemDateLocale?: string
   // Note specific
   getNote: (noteId: string) => Promise<Note | null>
   saveNote: (note: Note) => Promise<void>

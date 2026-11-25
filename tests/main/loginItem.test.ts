@@ -45,8 +45,9 @@ describe('loginItem', () => {
   })
 
   it('quotes Exec path when it contains spaces', () => {
-    const entry = buildAutostartDesktopEntry('/tmp/stickie-test/My Apps/Stickie.AppImage')
-    expect(entry).toContain('Exec="/tmp/stickie-test/My Apps/Stickie.AppImage"')
+    const appImagePath = join(tempConfigDir, 'My Apps', 'Stickie.AppImage')
+    const entry = buildAutostartDesktopEntry(appImagePath)
+    expect(entry).toContain(`Exec="${appImagePath}"`)
     expect(entry).toContain('X-GNOME-Autostart-enabled=true')
   })
 
@@ -62,14 +63,13 @@ describe('loginItem', () => {
   it('writes and removes autostart .desktop file on Linux', () => {
     Object.defineProperty(process, 'platform', { value: 'linux' })
     process.env.XDG_CONFIG_HOME = tempConfigDir
-    process.env.APPIMAGE = '/tmp/stickie-test/.local/share/stickie/Stickie.AppImage'
+    const appImagePath = join(tempConfigDir, 'Stickie.AppImage')
+    process.env.APPIMAGE = appImagePath
 
     const desktopPath = getLinuxAutostartFilePath()
     applyLoginItem(true)
     expect(existsSync(desktopPath)).toBe(true)
-    expect(readFileSync(desktopPath, 'utf-8')).toContain(
-      'Exec=/tmp/stickie-test/.local/share/stickie/Stickie.AppImage'
-    )
+    expect(readFileSync(desktopPath, 'utf-8')).toContain(`Exec=${appImagePath}`)
 
     applyLoginItem(false)
     expect(existsSync(desktopPath)).toBe(false)

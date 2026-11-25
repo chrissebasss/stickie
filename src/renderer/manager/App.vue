@@ -16,10 +16,14 @@ const { t } = useI18n()
 
 const notes = ref<NoteIndexItem[]>([])
 const searchQuery = ref('')
-const sortOrder = ref<'newest' | 'oldest' | 'title'>('newest')
-const sortOptions = computed<{ value: 'newest' | 'oldest' | 'title'; label: string }[]>(() => [
+const sortOrder = ref<'newest' | 'oldest' | 'created-newest' | 'created-oldest' | 'title'>('newest')
+const sortOptions = computed<
+  { value: 'newest' | 'oldest' | 'created-newest' | 'created-oldest' | 'title'; label: string }[]
+>(() => [
   { value: 'newest', label: t('manager.sortNewest') },
   { value: 'oldest', label: t('manager.sortOldest') },
+  { value: 'created-newest', label: t('manager.sortCreatedNewest') },
+  { value: 'created-oldest', label: t('manager.sortCreatedOldest') },
   { value: 'title', label: t('manager.sortTitle') }
 ])
 const isDark = ref(false)
@@ -78,6 +82,10 @@ const filteredNotes = computed(() => {
     list.sort((a, b) => b.updatedAt - a.updatedAt)
   } else if (sortOrder.value === 'oldest') {
     list.sort((a, b) => a.updatedAt - b.updatedAt)
+  } else if (sortOrder.value === 'created-newest') {
+    list.sort((a, b) => b.createdAt - a.createdAt)
+  } else if (sortOrder.value === 'created-oldest') {
+    list.sort((a, b) => a.createdAt - b.createdAt)
   } else if (sortOrder.value === 'title') {
     list.sort((a, b) => a.title.localeCompare(b.title))
   }
@@ -161,7 +169,7 @@ async function exportNote(note: NoteIndexItem) {
       <div class="flex items-center space-x-2">
         <button
           class="p-2 rounded-lg border border-yellow-400 dark:border-yellow-500/80 bg-yellow-300 hover:bg-yellow-400 text-stone-900 shadow-sm transition-colors focus:ring-2 focus:ring-yellow-500 focus:outline-none"
-          :title="t('manager.newNote')"
+          v-tooltip="t('manager.newNote')"
           :aria-label="t('manager.newNote')"
           @click="createNote"
         >
@@ -170,7 +178,7 @@ async function exportNote(note: NoteIndexItem) {
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          :title="t('manager.importNotes')"
+          v-tooltip="t('manager.importNotes')"
           :aria-label="t('manager.importNotes')"
           @click="importFiles"
         >
@@ -179,7 +187,7 @@ async function exportNote(note: NoteIndexItem) {
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          :title="t('manager.closeAllNotes')"
+          v-tooltip="t('manager.closeAllNotes')"
           :aria-label="t('manager.closeAllNotes')"
           @click="closeAllNotes"
         >
@@ -188,7 +196,7 @@ async function exportNote(note: NoteIndexItem) {
 
         <button
           class="p-2 rounded-lg border border-stone-200 dark:border-stone-700 text-stone-700 dark:text-stone-300 hover:bg-stone-100 dark:hover:bg-stone-700/60 transition-colors"
-          :title="t('manager.settings')"
+          v-tooltip="t('manager.settings')"
           :aria-label="t('manager.settings')"
           @click="showSettings = true"
         >
@@ -219,6 +227,7 @@ async function exportNote(note: NoteIndexItem) {
           :key="note.id"
           :note="note"
           :is-dark="isDark"
+          :language="settings.language"
           :search-query="searchQuery"
           @toggle="toggleNote"
           @delete="promptDelete"

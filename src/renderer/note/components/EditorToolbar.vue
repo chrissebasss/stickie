@@ -119,7 +119,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg font-bold': editor.isActive('bold') }"
-        :title="t('note.bold')"
+        v-tooltip="t('note.bold')"
         @click="editor.chain().focus().toggleBold().run()"
       >
         <Bold class="w-3.5 h-3.5" />
@@ -129,7 +129,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('italic') }"
-        :title="t('note.italic')"
+        v-tooltip="t('note.italic')"
         @click="editor.chain().focus().toggleItalic().run()"
       >
         <Italic class="w-3.5 h-3.5" />
@@ -139,7 +139,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('underline') }"
-        :title="t('note.underline')"
+        v-tooltip="t('note.underline')"
         @click="editor.chain().focus().toggleUnderline().run()"
       >
         <UnderlineIcon class="w-3.5 h-3.5" />
@@ -149,7 +149,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('strike') }"
-        :title="t('note.strike')"
+        v-tooltip="t('note.strike')"
         @click="editor.chain().focus().toggleStrike().run()"
       >
         <Strikethrough class="w-3.5 h-3.5" />
@@ -161,7 +161,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': activeSubToolbar === 'color' }"
-        :title="t('note.textColor')"
+        v-tooltip="t('note.textColor')"
         @click="toggleSubToolbar('color')"
       >
         <Baseline class="w-3.5 h-3.5" />
@@ -171,7 +171,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': activeSubToolbar === 'highlight' || editor.isActive('highlight') }"
-        :title="t('note.highlight')"
+        v-tooltip="t('note.highlight')"
         @click="toggleSubToolbar('highlight')"
       >
         <Highlighter class="w-3.5 h-3.5" />
@@ -183,7 +183,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('bulletList') }"
-        :title="t('note.bulletList')"
+        v-tooltip="t('note.bulletList')"
         @click="editor.chain().focus().toggleBulletList().run()"
       >
         <List class="w-3.5 h-3.5" />
@@ -193,7 +193,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('orderedList') }"
-        :title="t('note.orderedList')"
+        v-tooltip="t('note.orderedList')"
         @click="editor.chain().focus().toggleOrderedList().run()"
       >
         <ListOrdered class="w-3.5 h-3.5" />
@@ -203,7 +203,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': editor.isActive('taskList') }"
-        :title="t('note.checklist')"
+        v-tooltip="t('note.checklist')"
         @click="editor.chain().focus().toggleTaskList().run()"
       >
         <CheckSquare class="w-3.5 h-3.5" />
@@ -215,7 +215,7 @@ function insertCustomTable() {
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg flex items-center"
         :class="{ 'bg-black/15 dark:bg-white/15 text-note-fg': activeSubToolbar === 'table' || editor.isActive('table') }"
-        :title="t('note.table')"
+        v-tooltip="t('note.table')"
         @click="toggleSubToolbar('table')"
       >
         <TableIcon class="w-3.5 h-3.5" />
@@ -224,7 +224,7 @@ function insertCustomTable() {
       <!-- Image -->
       <button
         class="p-1 rounded hover:bg-black/10 dark:hover:bg-white/10 hover:text-note-fg"
-        :title="t('note.image')"
+        v-tooltip="t('note.image')"
         @click="emit('pickImage')"
       >
         <ImageIcon class="w-3.5 h-3.5" />
@@ -245,12 +245,12 @@ function insertCustomTable() {
             :key="c"
             class="w-4 h-4 rounded-full border border-black/20 hover:scale-110 transition-transform cursor-pointer"
             :style="{ backgroundColor: c }"
-            :title="c"
+            v-tooltip="c"
             @click="setHighlight(c)"
           />
           <label
             class="w-4 h-4 rounded-full border border-black/20 overflow-hidden cursor-pointer relative hover:scale-110 transition-transform bg-gradient-to-tr from-yellow-300 via-pink-400 to-purple-500"
-            :title="t('note.customColor')"
+            v-tooltip="t('note.customColor')"
           >
             <input
               type="color"
@@ -260,7 +260,7 @@ function insertCustomTable() {
           </label>
           <button
             class="text-[11px] px-1.5 py-0.5 rounded border border-black/15 dark:border-white/15 hover:bg-black/10 dark:hover:bg-white/10 opacity-80 hover:opacity-100 ml-1 cursor-pointer"
-            :title="t('note.clearHighlight')"
+            v-tooltip="t('note.clearHighlight')"
             @click="clearHighlight"
           >
             {{ t('note.clearHighlight') }}
@@ -277,12 +277,12 @@ function insertCustomTable() {
             :key="c"
             class="w-4 h-4 rounded-full border border-black/20 hover:scale-110 transition-transform cursor-pointer"
             :style="{ backgroundColor: c }"
-            :title="c"
+            v-tooltip="c"
             @click="setTextColor(c)"
           />
           <label
             class="w-4 h-4 rounded-full border border-black/20 overflow-hidden cursor-pointer relative hover:scale-110 transition-transform bg-gradient-to-tr from-red-500 via-green-500 to-blue-500"
-            :title="t('note.customColor')"
+            v-tooltip="t('note.customColor')"
           >
             <input
               type="color"
@@ -292,7 +292,7 @@ function insertCustomTable() {
           </label>
           <button
             class="text-[11px] px-1.5 py-0.5 rounded border border-black/15 dark:border-white/15 hover:bg-black/10 dark:hover:bg-white/10 opacity-80 hover:opacity-100 ml-1 cursor-pointer"
-            :title="t('note.resetColor')"
+            v-tooltip="t('note.resetColor')"
             @click="resetTextColor"
           >
             {{ t('note.resetColor') }}
@@ -345,35 +345,35 @@ function insertCustomTable() {
           <div class="flex items-center space-x-1 flex-wrap gap-y-1">
             <button
               class="px-1.5 py-0.5 rounded border border-black/15 dark:border-white/15 hover:bg-black/10 dark:hover:bg-white/10 text-[11px] cursor-pointer"
-              :title="t('note.addRowBelow')"
+              v-tooltip="t('note.addRowBelow')"
               @click="editor.chain().focus().addRowAfter().run()"
             >
               + {{ t('note.row') }}
             </button>
             <button
               class="px-1.5 py-0.5 rounded border border-black/15 dark:border-white/15 hover:bg-black/10 dark:hover:bg-white/10 text-[11px] cursor-pointer"
-              :title="t('note.addColumnAfter')"
+              v-tooltip="t('note.addColumnAfter')"
               @click="editor.chain().focus().addColumnAfter().run()"
             >
               + {{ t('note.col') }}
             </button>
             <button
               class="px-1.5 py-0.5 rounded border border-red-500/20 text-red-500 hover:bg-red-500/10 text-[11px] cursor-pointer"
-              :title="t('note.deleteRow')"
+              v-tooltip="t('note.deleteRow')"
               @click="editor.chain().focus().deleteRow().run()"
             >
               - {{ t('note.row') }}
             </button>
             <button
               class="px-1.5 py-0.5 rounded border border-red-500/20 text-red-500 hover:bg-red-500/10 text-[11px] cursor-pointer"
-              :title="t('note.deleteColumn')"
+              v-tooltip="t('note.deleteColumn')"
               @click="editor.chain().focus().deleteColumn().run()"
             >
               - {{ t('note.col') }}
             </button>
             <button
               class="px-1.5 py-0.5 rounded bg-red-500/15 text-red-600 dark:text-red-400 hover:bg-red-500/25 text-[11px] font-medium ml-1 cursor-pointer"
-              :title="t('note.deleteTable')"
+              v-tooltip="t('note.deleteTable')"
               @click="editor.chain().focus().deleteTable().run(); activeSubToolbar = null"
             >
               {{ t('note.deleteTable') }}
@@ -386,7 +386,7 @@ function insertCustomTable() {
       <div class="flex-1" />
       <button
         class="p-0.5 rounded hover:bg-black/10 dark:hover:bg-white/10 opacity-60 hover:opacity-100 cursor-pointer ml-auto"
-        title="Close"
+        v-tooltip="'Close'"
         @click="activeSubToolbar = null"
       >
         <X class="w-3.5 h-3.5" />

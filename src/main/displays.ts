@@ -56,7 +56,7 @@ export async function validateAndRelocateAllWindows(
         const note = await noteStore.getNote(noteId)
         if (note) {
           note.bounds = safeBounds
-          noteStore.queueSave(note)
+          noteStore.queueSave(note, { touchUpdatedAt: false })
         }
         cascadeIndex++
       }

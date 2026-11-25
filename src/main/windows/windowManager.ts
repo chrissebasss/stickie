@@ -95,7 +95,7 @@ export class WindowManager {
       const currentNote = await this.noteStore.getNote(noteId)
       if (currentNote) {
         currentNote.bounds = currentBounds
-        this.noteStore.queueSave(currentNote)
+        this.noteStore.queueSave(currentNote, { touchUpdatedAt: false })
       }
     }
 
@@ -121,7 +121,7 @@ export class WindowManager {
           const currentNote = await this.noteStore.getNote(noteId)
           if (currentNote) {
             currentNote.bounds = currentBounds
-            await this.noteStore.saveNoteNow(currentNote)
+            await this.noteStore.saveNoteNow(currentNote, { touchUpdatedAt: false })
           }
         } catch {
           // ignore
@@ -177,7 +177,7 @@ export class WindowManager {
         const currentNote = await this.noteStore.getNote(noteId)
         if (currentNote) {
           currentNote.bounds = currentBounds
-          await this.noteStore.saveNoteNow(currentNote)
+          await this.noteStore.saveNoteNow(currentNote, { touchUpdatedAt: false })
         }
       } catch {
         // ignore
@@ -194,7 +194,7 @@ export class WindowManager {
           const currentNote = await this.noteStore.getNote(noteId)
           if (currentNote) {
             currentNote.bounds = currentBounds
-            await this.noteStore.saveNoteNow(currentNote)
+            await this.noteStore.saveNoteNow(currentNote, { touchUpdatedAt: false })
           }
         } catch {
           // ignore

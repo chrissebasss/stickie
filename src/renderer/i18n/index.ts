@@ -27,6 +27,15 @@ export const i18n = createI18n({
   }
 })
 
+export function resolveDateLocale(
+  preference?: LanguageMode | string,
+  systemDateLocale?: string
+): string | undefined {
+  if (preference === 'nb') return 'nb-NO'
+  if (preference === 'en') return 'en-US'
+  return systemDateLocale || undefined
+}
+
 export function setAppLanguage(preference: LanguageMode | string): void {
   const resolved = resolveLocale(preference)
   i18n.global.locale.value = resolved

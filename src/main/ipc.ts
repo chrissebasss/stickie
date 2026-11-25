@@ -16,6 +16,15 @@ import { saveAssetFile, saveAssetBuffer } from './store/assets'
 import { importFilesFromDisk, exportNoteToFile } from './importExport'
 import { applyLoginItem } from './loginItem'
 
+function hasNoteContentChanged(prev: Note | null, next: Note): boolean {
+  if (!prev) return true
+  return (
+    prev.plainText !== next.plainText ||
+    JSON.stringify(prev.content) !== JSON.stringify(next.content) ||
+    JSON.stringify(prev.color) !== JSON.stringify(next.color)
+  )
+}
+
 export function registerIpcHandlers(
   noteStore: NoteStore,
   settingsStore: SettingsStore,
@@ -30,16 +39,14 @@ export function registerIpcHandlers(
   // 2. Note: Save
   ipcMain.handle(IPC_CHANNELS.NOTE_SAVE, async (_, note: Note): Promise<void> => {
     if (!note || !note.id) return
+    const existing = await noteStore.getNote(note.id)
     const win = windowManager.getOpenNoteWindow(note.id)
     if (win && !win.isDestroyed()) {
       note.bounds = win.getNormalBounds()
-    } else {
-      const existing = await noteStore.getNote(note.id)
-      if (existing) {
-        note.bounds = existing.bounds
-      }
+    } else if (existing) {
+      note.bounds = existing.bounds
     }
-    noteStore.queueSave(note)
+    noteStore.queueSave(note, { touchUpdatedAt: hasNoteContentChanged(existing, note) })
   })
 
   // 3. Note: Close
@@ -48,17 +55,17 @@ export function registerIpcHandlers(
     async (_, noteId: string, currentNote?: Note): Promise<void> => {
       if (!noteId) return
       const win = windowManager.getOpenNoteWindow(noteId)
-      let noteToSave = currentNote || (await noteStore.getNote(noteId))
+      const existing = await noteStore.getNote(noteId)
+      const noteToSave = currentNote || existing
       if (noteToSave) {
         if (win && !win.isDestroyed()) {
           noteToSave.bounds = win.getNormalBounds()
-        } else {
-          const existing = await noteStore.getNote(noteId)
-          if (existing) {
-            noteToSave.bounds = existing.bounds
-          }
+        } else if (existing) {
+          noteToSave.bounds = existing.bounds
         }
-        await noteStore.discardIfEmpty(noteToSave)
+        await noteStore.discardIfEmpty(noteToSave, {
+          touchUpdatedAt: hasNoteContentChanged(existing, noteToSave)
+        })
       }
       await windowManager.closeNote(noteId)
     }
@@ -119,7 +126,7 @@ export function registerIpcHandlers(
       const note = await noteStore.getNote(noteId)
       if (note) {
         note.alwaysOnTop = alwaysOnTop
-        noteStore.queueSave(note)
+        noteStore.queueSave(note, { touchUpdatedAt: false })
       }
     }
   )
@@ -132,7 +139,7 @@ export function registerIpcHandlers(
       const note = await noteStore.getNote(noteId)
       if (note) {
         note.bounds = bounds
-        noteStore.queueSave(note)
+        noteStore.queueSave(note, { touchUpdatedAt: false })
       }
     }
   )
