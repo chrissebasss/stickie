@@ -31,7 +31,7 @@ Apply these skills automatically without waiting for the user to invoke them:
 - **`humanizer`**: Use whenever writing or updating documentation (`README.md`, `AGENTS.md`).
 - **Verification:** The agent runs typecheck, tests, build and syntax checks itself and reports the results. Do not ask the user to run commands the agent can run; only ask for checks that need a live GUI, another machine, or an external side effect.
 - **UI components:** Never use browser-native dialogs, alerts, prompts, selects or dropdowns. Use the project's Vue components, such as `CustomSelect` and the app's modals, so styling, keyboard handling and dark mode stay consistent.
-- **Locales:** Each JSON in `src/renderer/locales/` is discovered at build time. Its `_meta` block holds `code`, `name` and `intlLocale`; the Settings dropdown and date formatting read those fields. Adding a language means adding one JSON file with the same keys as `en.json`. Check the set with `pnpm run test:locales`, which also runs as part of `pnpm run test`.
+- **Locales:** Each JSON in `src/renderer/locales/` is discovered at build time. Its `_meta` block holds `code`, `name` and `intlLocale`; the Settings dropdown and date formatting read those fields. Adding a language means adding one JSON file with the same keys as `en.json`. Check the set with `pnpm run test:locales`, which also runs as part of `pnpm run test`. Placeholders must be exact and shortcut combinations must keep the same modifiers and final key; localized modifier names such as `Strg` for `Ctrl` are allowed.
 - **Local tooling:** `scripts/generate_locale.py` and `scripts/validate_locales.py` are gitignored personal tools. Do not commit them.
 
 ## Documentation Maintenance

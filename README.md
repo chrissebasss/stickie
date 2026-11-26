@@ -51,7 +51,7 @@ Stickie discovers languages from `src/renderer/locales/*.json` when it builds. E
 
 System default follows the OS language when a matching locale exists, and falls back to English otherwise. An unknown saved language also falls back to English.
 
-To add a language, add one JSON file, then run `pnpm run test:locales`. That check validates every locale file and runs with `pnpm run test`. The local generation scripts contain personal paths and stay out of git. The generator prints `Validation OK` before it writes a file. Press Enter in the worker tab, or close it, to stop llama-server.
+To add a language, add one JSON file, then run `pnpm run test:locales`. That check validates every locale file and runs with `pnpm run test`. Shortcut modifier names may be localized, as in `Strg+B` for German, but the key combination must stay intact. The local generation scripts contain personal paths and stay out of git. The generator prints `Validation OK` before it writes a file. Press Enter in the worker tab, or close it, to stop llama-server.
 
 ## Development
 
